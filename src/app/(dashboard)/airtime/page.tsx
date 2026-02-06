@@ -10,19 +10,20 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { vtuAPI } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
+import { NetworkProvider } from "@/types";
 
-const networks = [
-  { code: "MTN", name: "MTN Nigeria", color: "bg-yellow-500", logo: "M" },
-  { code: "GLO", name: "Glo", color: "bg-green-600", logo: "G" },
-  { code: "AIRTEL", name: "Airtel", color: "bg-red-600", logo: "A" },
-  { code: "9MOBILE", name: "9mobile", color: "bg-green-500", logo: "9" },
+const networks: { code: NetworkProvider; name: string; color: string; logo: string }[] = [
+  { code: "mtn", name: "MTN Nigeria", color: "bg-yellow-500", logo: "M" },
+  { code: "glo", name: "Glo", color: "bg-green-600", logo: "G" },
+  { code: "airtel", name: "Airtel", color: "bg-red-600", logo: "A" },
+  { code: "9mobile", name: "9mobile", color: "bg-green-500", logo: "9" },
 ];
 
 const quickAmounts = [100, 200, 500, 1000, 2000, 5000];
 
 export default function AirtimePage() {
-  const [selectedNetwork, setSelectedNetwork] = useState("");
-  const [phone, setPhone] = useState("");
+  const [selectedNetwork, setSelectedNetwork] = useState<NetworkProvider | "">("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [amount, setAmount] = useState("");
   const [pin, setPin] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +36,7 @@ export default function AirtimePage() {
       toast.error("Please select a network");
       return;
     }
-    if (!phone || phone.length !== 11) {
+    if (!phoneNumber || phoneNumber.length !== 11) {
       toast.error("Please enter a valid phone number");
       return;
     }
@@ -55,8 +56,8 @@ export default function AirtimePage() {
     setIsLoading(true);
     try {
       const response = await vtuAPI.buyAirtime({
-        phone,
-        network: selectedNetwork,
+        phone_number: phoneNumber,
+        network: selectedNetwork as NetworkProvider,
         amount: parseInt(amount),
         pin,
       });
@@ -74,7 +75,7 @@ export default function AirtimePage() {
 
   const resetForm = () => {
     setSelectedNetwork("");
-    setPhone("");
+    setPhoneNumber("");
     setAmount("");
     setShowSuccessModal(false);
   };
@@ -133,8 +134,8 @@ export default function AirtimePage() {
             label="Phone Number"
             type="tel"
             placeholder="08012345678"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 11))}
             leftIcon={<Phone className="w-5 h-5" />}
           />
 
@@ -186,7 +187,7 @@ export default function AirtimePage() {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Phone</span>
-              <span className="text-foreground">{phone}</span>
+              <span className="text-foreground">{phoneNumber}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Amount</span>
@@ -224,7 +225,7 @@ export default function AirtimePage() {
               Airtime Sent!
             </h3>
             <p className="text-muted-foreground">
-              {formatCurrency(parseInt(amount))} airtime has been sent to {phone}
+              {formatCurrency(parseInt(amount))} airtime has been sent to {phoneNumber}
             </p>
           </div>
           <div className="glass-card rounded-xl p-4">

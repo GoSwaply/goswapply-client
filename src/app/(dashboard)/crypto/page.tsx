@@ -10,11 +10,11 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { cryptoAPI } from "@/lib/api";
 import { formatCurrency, cn } from "@/lib/utils";
-import { CryptoCurrency, CryptoRate } from "@/types";
+import { CryptoCurrency, CryptoExchangeRate } from "@/types";
 
 export default function CryptoPage() {
   const [currencies, setCurrencies] = useState<CryptoCurrency[]>([]);
-  const [rates, setRates] = useState<CryptoRate[]>([]);
+  const [rates, setRates] = useState<CryptoExchangeRate[]>([]);
   const [selectedCurrency, setSelectedCurrency] = useState<CryptoCurrency | null>(null);
   const [amount, setAmount] = useState("");
   const [proofImage, setProofImage] = useState<File | null>(null);

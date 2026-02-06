@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     first_name: user?.first_name || "",
     last_name: user?.last_name || "",
-    phone: user?.phone || "",
+    phone_number: user?.phone_number || "",
     address: user?.address || "",
     state: user?.state || "",
     city: user?.city || "",
@@ -65,7 +65,7 @@ export default function ProfilePage() {
 
     setIsSettingPin(true);
     try {
-      await authAPI.setPin({ pin: newPin });
+      await authAPI.setPin({ pin: newPin, confirm_pin: confirmPin });
       toast.success("Transaction PIN set successfully");
       setShowPinModal(false);
       setNewPin("");
@@ -180,8 +180,8 @@ export default function ProfilePage() {
               />
               <Input
                 label="Phone Number"
-                name="phone"
-                value={formData.phone}
+                name="phone_number"
+                value={formData.phone_number}
                 onChange={handleChange}
                 disabled={!isEditing}
                 leftIcon={<Phone className="w-5 h-5" />}

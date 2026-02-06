@@ -57,8 +57,8 @@ export default function WalletPage() {
   const fetchTransactions = async () => {
     setIsLoading(true);
     try {
-      const params: Record<string, unknown> = { limit: 50 };
-      if (filterType) params.type = filterType;
+      const params: Record<string, unknown> = { page_size: 50 };
+      if (filterType) params.transaction_type = filterType;
       const response = await walletAPI.getTransactions(params);
       setTransactions(response.data.results || response.data);
     } catch {
@@ -121,7 +121,7 @@ export default function WalletPage() {
     if (searchQuery) {
       return (
         tx.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tx.type.toLowerCase().includes(searchQuery.toLowerCase())
+        tx.transaction_type.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     return true;
@@ -241,12 +241,12 @@ export default function WalletPage() {
                     <div
                       className={cn(
                         "w-10 h-10 rounded-full flex items-center justify-center",
-                        tx.type === "deposit"
+                        tx.transaction_type === "deposit"
                           ? "bg-green-500/20"
                           : "bg-red-500/20"
                       )}
                     >
-                      {tx.type === "deposit" ? (
+                      {tx.transaction_type === "deposit" ? (
                         <ArrowDownLeft className="w-5 h-5 text-green-500" />
                       ) : (
                         <ArrowUpRight className="w-5 h-5 text-red-400" />
@@ -254,7 +254,7 @@ export default function WalletPage() {
                     </div>
                     <div>
                       <p className="font-medium text-foreground capitalize">
-                        {tx.type.replace("_", " ")}
+                        {tx.transaction_type.replace("_", " ")}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(tx.created_at).toLocaleString()}
@@ -266,12 +266,12 @@ export default function WalletPage() {
                       <p
                         className={cn(
                           "font-semibold",
-                          tx.type === "deposit"
+                          tx.transaction_type === "deposit"
                             ? "text-green-500"
                             : "text-foreground"
                         )}
                       >
-                        {tx.type === "deposit" ? "+" : "-"}
+                        {tx.transaction_type === "deposit" ? "+" : "-"}
                         {formatCurrency(tx.amount)}
                       </p>
                       <p className="text-xs text-muted-foreground">

@@ -44,7 +44,7 @@ export default function BettingPage() {
     setIsVerifying(true);
     try {
       const response = await bettingAPI.verifyCustomer({
-        provider: selectedProvider,
+        provider_code: selectedProvider,
         customer_id: customerId,
       });
       setCustomerName(response.data.customer_name);
@@ -80,7 +80,7 @@ export default function BettingPage() {
     setIsLoading(true);
     try {
       const response = await bettingAPI.fundAccount({
-        provider: selectedProvider,
+        provider_code: selectedProvider,
         customer_id: customerId,
         amount: parseInt(amount),
         pin,

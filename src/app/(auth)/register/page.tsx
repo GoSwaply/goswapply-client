@@ -19,7 +19,7 @@ export default function RegisterPage() {
     first_name: "",
     last_name: "",
     email: "",
-    phone: "",
+    phone_number: "",
     password: "",
     confirm_password: "",
     referral_code: "",
@@ -44,7 +44,7 @@ export default function RegisterPage() {
       toast.error("Please enter a valid email address");
       return false;
     }
-    if (!formData.phone.trim() || formData.phone.length < 10) {
+    if (!formData.phone_number.trim() || formData.phone_number.length < 10) {
       toast.error("Please enter a valid phone number");
       return false;
     }
@@ -84,8 +84,9 @@ export default function RegisterPage() {
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email,
-        phone: formData.phone,
+        phone_number: formData.phone_number,
         password: formData.password,
+        referral_code: formData.referral_code || undefined,
       });
       toast.success("Account created successfully!");
       router.push("/dashboard");
@@ -177,10 +178,10 @@ export default function RegisterPage() {
 
               <Input
                 label="Phone Number"
-                name="phone"
+                name="phone_number"
                 type="tel"
                 placeholder="08012345678"
-                value={formData.phone}
+                value={formData.phone_number}
                 onChange={handleChange}
                 leftIcon={<PhoneIcon size={20} />}
               />

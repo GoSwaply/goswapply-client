@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import Cookies from "js-cookie";
-import { User } from "@/types";
+import { User, RegisterRequest, ProfileUpdateRequest } from "@/types";
 import { authAPI } from "@/lib/api";
 
 interface AuthState {
@@ -10,16 +10,10 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: {
-    email: string;
-    phone: string;
-    password: string;
-    first_name: string;
-    last_name: string;
-  }) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
   fetchProfile: () => Promise<void>;
-  updateProfile: (data: Partial<User>) => Promise<void>;
+  updateProfile: (data: ProfileUpdateRequest) => Promise<void>;
   clearError: () => void;
 }
 

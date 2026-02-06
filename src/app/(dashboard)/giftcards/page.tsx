@@ -42,7 +42,7 @@ export default function GiftCardsPage() {
     if (selectedRate && amount) {
       const amountUsd = parseFloat(amount);
       if (amountUsd >= selectedRate.min_amount && amountUsd <= selectedRate.max_amount) {
-        setCalculatedAmount(amountUsd * selectedRate.rate);
+        setCalculatedAmount(amountUsd * selectedRate.rate_per_dollar);
       } else {
         setCalculatedAmount(0);
       }
@@ -215,7 +215,7 @@ export default function GiftCardsPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-primary font-bold">
-                          {formatCurrency(rate.rate)}/USD
+                          {formatCurrency(rate.rate_per_dollar)}/USD
                         </p>
                       </div>
                     </div>

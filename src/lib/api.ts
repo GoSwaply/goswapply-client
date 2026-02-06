@@ -1,5 +1,25 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import type {
+  LoginRequest,
+  RegisterRequest,
+  ProfileUpdateRequest,
+  SetPinRequest,
+  VerifyPinRequest,
+  OTPRequest,
+  OTPVerifyRequest,
+  WithdrawRequest,
+  TransferRequest,
+  BuyAirtimeRequest,
+  BuyDataRequest,
+  BuyElectricityRequest,
+  BuyTVRequest,
+  FundBettingRequest,
+  FlightSearchRequest,
+  FlightBookingRequest,
+  TransactionFilter,
+  NetworkProvider,
+} from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -48,86 +68,162 @@ api.interceptors.response.use(
   }
 );
 
+// ==========================================
+// AUTHENTICATION API
+// ==========================================
 export const authAPI = {
-  login: (data: { email: string; password: string }) => api.post("/auth/login/", data),
-  register: (data: { email: string; phone: string; password: string; first_name: string; last_name: string }) =>
-    api.post("/auth/register/", data),
+  login: (data: LoginRequest) => api.post("/auth/login/", data),
+  register: (data: RegisterRequest) => api.post("/auth/register/", data),
   logout: () => api.post("/auth/logout/"),
   getProfile: () => api.get("/auth/profile/"),
-  updateProfile: (data: Record<string, unknown>) => api.put("/auth/profile/", data),
-  setPin: (data: { pin: string }) => api.post("/auth/set-pin/", data),
-  verifyPin: (data: { pin: string }) => api.post("/auth/verify-pin/", data),
-  requestOtp: (data: { phone?: string; email?: string; purpose: string }) => api.post("/auth/request-otp/", data),
-  verifyOtp: (data: { otp: string; purpose: string }) => api.post("/auth/verify-otp/", data),
+  updateProfile: (data: ProfileUpdateRequest) => {
+    if (data.profile_picture) {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined) {
+          formData.append(key, value as string | Blob);
+        }
+      });
+      return api.put("/auth/profile/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    }
+    return api.put("/auth/profile/", data);
+  },
+  setPin: (data: SetPinRequest) => api.post("/auth/set-pin/", data),
+  verifyPin: (data: VerifyPinRequest) => api.post("/auth/verify-pin/", data),
+  changePassword: (data: { old_password: string; new_password: string }) =>
+    api.post("/auth/change-password/", data),
+  requestOtp: (data: OTPRequest) => api.post("/auth/request-otp/", data),
+  verifyOtp: (data: OTPVerifyRequest) => api.post("/auth/verify-otp/", data),
+  resetPassword: (data: { email: string }) => api.post("/auth/reset-password/", data),
+  confirmResetPassword: (data: { token: string; new_password: string }) =>
+    api.post("/auth/reset-password/confirm/", data),
 };
 
+// ==========================================
+// WALLET API
+// ==========================================
 export const walletAPI = {
   getWallet: () => api.get("/wallet/"),
   getSummary: () => api.get("/wallet/summary/"),
-  getTransactions: (params?: Record<string, unknown>) => api.get("/wallet/transactions/", { params }),
+  getTransactions: (params?: TransactionFilter) => api.get("/wallet/transactions/", { params }),
   getTransaction: (reference: string) => api.get(`/wallet/transactions/${reference}/`),
   getFundingAccounts: () => api.get("/wallet/funding-accounts/"),
-  withdraw: (data: { amount: number; bank_code: string; account_number: string; pin: string }) =>
-    api.post("/wallet/withdraw/", data),
-  transfer: (data: { amount: number; recipient_email: string; pin: string }) => api.post("/wallet/transfer/", data),
+  getDVA: () => api.get("/wallet/dva/"),
+  createDVA: () => api.post("/wallet/dva/create/"),
+  withdraw: (data: WithdrawRequest) => api.post("/wallet/withdraw/", data),
+  transfer: (data: TransferRequest) => api.post("/wallet/transfer/", data),
+  getBanks: () => api.get("/wallet/banks/"),
+  verifyBankAccount: (data: { bank_code: string; account_number: string }) =>
+    api.post("/wallet/verify-account/", data),
 };
 
+// ==========================================
+// VTU (AIRTIME & DATA) API
+// ==========================================
 export const vtuAPI = {
   getNetworks: () => api.get("/vtu/networks/"),
-  buyAirtime: (data: { phone: string; network: string; amount: number; pin: string }) =>
-    api.post("/vtu/airtime/buy/", data),
-  getDataPlans: (network?: string) => api.get("/vtu/data/plans/", { params: { network } }),
-  buyData: (data: { phone: string; network: string; plan_id: string; pin: string }) =>
-    api.post("/vtu/data/buy/", data),
+  getNetworkDiscounts: () => api.get("/vtu/discounts/"),
+
+  // Airtime
+  buyAirtime: (data: BuyAirtimeRequest) => api.post("/vtu/airtime/buy/", data),
+  getAirtimeHistory: (params?: TransactionFilter) => api.get("/vtu/airtime/history/", { params }),
+
+  // Data
+  getDataPlans: (network?: NetworkProvider) => api.get("/vtu/data/plans/", { params: { network } }),
+  buyData: (data: BuyDataRequest) => api.post("/vtu/data/buy/", data),
+  getDataHistory: (params?: TransactionFilter) => api.get("/vtu/data/history/", { params }),
 };
 
+// ==========================================
+// UTILITIES API (ELECTRICITY & TV)
+// ==========================================
 export const utilitiesAPI = {
+  // Electricity
   getElectricityProviders: () => api.get("/utilities/electricity/providers/"),
-  verifyMeter: (data: { provider: string; meter_number: string; meter_type: string }) =>
+  verifyMeter: (data: { provider_code: string; meter_number: string; meter_type: "prepaid" | "postpaid" }) =>
     api.post("/utilities/electricity/verify/", data),
-  payElectricity: (data: { provider: string; meter_number: string; meter_type: string; amount: number; pin: string }) =>
-    api.post("/utilities/electricity/pay/", data),
+  buyElectricity: (data: BuyElectricityRequest) => api.post("/utilities/electricity/buy/", data),
+  getElectricityHistory: (params?: TransactionFilter) =>
+    api.get("/utilities/electricity/history/", { params }),
+
+  // TV/Cable
   getTVProviders: () => api.get("/utilities/tv/providers/"),
-  getTVPlans: (provider: string) => api.get(`/utilities/tv/plans/${provider}/`),
-  verifySmartcard: (data: { provider: string; smartcard_number: string }) =>
+  getTVPlans: (provider_code: string) => api.get("/utilities/tv/plans/", { params: { provider: provider_code } }),
+  verifySmartcard: (data: { provider_code: string; smartcard_number: string }) =>
     api.post("/utilities/tv/verify/", data),
-  payTV: (data: { provider: string; smartcard_number: string; plan_id: string; pin: string }) =>
-    api.post("/utilities/tv/pay/", data),
+  buyTV: (data: BuyTVRequest) => api.post("/utilities/tv/buy/", data),
+  getTVHistory: (params?: TransactionFilter) => api.get("/utilities/tv/history/", { params }),
 };
 
+// ==========================================
+// BETTING API
+// ==========================================
 export const bettingAPI = {
   getProviders: () => api.get("/betting/providers/"),
-  verifyCustomer: (data: { provider: string; customer_id: string }) => api.post("/betting/verify/", data),
-  fundAccount: (data: { provider: string; customer_id: string; amount: number; pin: string }) =>
-    api.post("/betting/fund/", data),
+  verifyCustomer: (data: { provider_code: string; customer_id: string }) =>
+    api.post("/betting/verify/", data),
+  fundAccount: (data: FundBettingRequest) => api.post("/betting/fund/", data),
+  getBettingHistory: (params?: TransactionFilter) => api.get("/betting/history/", { params }),
 };
 
+// ==========================================
+// FLIGHTS API
+// ==========================================
 export const flightsAPI = {
-  search: (data: {
-    origin: string;
-    destination: string;
-    departure_date: string;
-    return_date?: string;
-    adults: number;
-    children?: number;
-    infants?: number;
-    travel_class?: string;
-  }) => api.get("/flights/search/", { params: data }),
-  book: (data: { search_id: string; offer_id: string; passengers: unknown[]; contact: unknown; pin: string }) =>
-    api.post("/flights/book/", data),
+  getAirports: (query?: string) => api.get("/flights/airports/", { params: { q: query } }),
+  getAirlines: () => api.get("/flights/airlines/"),
+  search: (data: FlightSearchRequest) => api.post("/flights/search/", data),
+  getSearchResults: (searchId: string) => api.get(`/flights/search/${searchId}/`),
+  book: (data: FlightBookingRequest) => api.post("/flights/book/", data),
   getBooking: (reference: string) => api.get(`/flights/bookings/${reference}/`),
+  getBookings: (params?: TransactionFilter) => api.get("/flights/bookings/", { params }),
+  cancelBooking: (reference: string) => api.post(`/flights/bookings/${reference}/cancel/`),
 };
 
+// ==========================================
+// GIFT CARDS API
+// ==========================================
 export const giftcardsAPI = {
   getTypes: () => api.get("/giftcards/types/"),
-  getRates: (typeCode: string) => api.get(`/giftcards/rates/${typeCode}/`),
-  sell: (data: FormData) => api.post("/giftcards/sell/", data, { headers: { "Content-Type": "multipart/form-data" } }),
+  getRates: (typeCode: string, country?: string) =>
+    api.get("/giftcards/rates/", { params: { card_type: typeCode, country } }),
+  calculateRate: (data: { card_type_code: string; card_country: string; card_value_usd: number }) =>
+    api.post("/giftcards/calculate/", data),
+  sell: (data: FormData) =>
+    api.post("/giftcards/sell/", data, { headers: { "Content-Type": "multipart/form-data" } }),
+  getHistory: (params?: TransactionFilter) => api.get("/giftcards/history/", { params }),
+  getTransaction: (reference: string) => api.get(`/giftcards/transactions/${reference}/`),
 };
 
+// ==========================================
+// CRYPTOCURRENCY API
+// ==========================================
 export const cryptoAPI = {
   getCurrencies: () => api.get("/crypto/currencies/"),
   getRates: () => api.get("/crypto/rates/"),
-  sell: (data: FormData) => api.post("/crypto/sell/", data, { headers: { "Content-Type": "multipart/form-data" } }),
+  calculateRate: (data: { currency_symbol: string; crypto_amount: number }) =>
+    api.post("/crypto/calculate/", data),
+  sell: (data: FormData) =>
+    api.post("/crypto/sell/", data, { headers: { "Content-Type": "multipart/form-data" } }),
+  uploadProof: (reference: string, data: FormData) =>
+    api.post(`/crypto/transactions/${reference}/upload-proof/`, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  getHistory: (params?: TransactionFilter) => api.get("/crypto/history/", { params }),
+  getTransaction: (reference: string) => api.get(`/crypto/transactions/${reference}/`),
+};
+
+// ==========================================
+// NOTIFICATIONS API
+// ==========================================
+export const notificationsAPI = {
+  getNotifications: (params?: { is_read?: boolean; page?: number; page_size?: number }) =>
+    api.get("/notifications/", { params }),
+  markAsRead: (id: string) => api.post(`/notifications/${id}/read/`),
+  markAllAsRead: () => api.post("/notifications/read-all/"),
+  getUnreadCount: () => api.get("/notifications/unread-count/"),
 };
 
 export default api;

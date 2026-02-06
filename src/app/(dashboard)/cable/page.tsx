@@ -62,7 +62,7 @@ export default function CablePage() {
     setIsVerifying(true);
     try {
       const response = await utilitiesAPI.verifySmartcard({
-        provider,
+        provider_code: provider,
         smartcard_number: smartcardNumber,
       });
       setCustomerName(response.data.customer_name);
@@ -97,8 +97,8 @@ export default function CablePage() {
 
     setIsLoading(true);
     try {
-      const response = await utilitiesAPI.payTV({
-        provider,
+      const response = await utilitiesAPI.buyTV({
+        provider_code: provider,
         smartcard_number: smartcardNumber,
         plan_id: selectedPlan!.id,
         pin,

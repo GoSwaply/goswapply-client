@@ -18,7 +18,7 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import { flightsAPI } from "@/lib/api";
 import { formatCurrency, cn } from "@/lib/utils";
-import { Flight } from "@/types";
+import { FlightOffer } from "@/types";
 
 const travelClasses = [
   { value: "ECONOMY", label: "Economy" },
@@ -34,8 +34,8 @@ export default function FlightsPage() {
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [adults, setAdults] = useState("1");
-  const [travelClass, setTravelClass] = useState("ECONOMY");
-  const [flights, setFlights] = useState<Flight[]>([]);
+  const [travelClass, setTravelClass] = useState<"ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST">("ECONOMY");
+  const [flights, setFlights] = useState<FlightOffer[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -187,7 +187,7 @@ export default function FlightsPage() {
               label="Class"
               options={travelClasses}
               value={travelClass}
-              onChange={(e) => setTravelClass(e.target.value)}
+              onChange={(e) => setTravelClass(e.target.value as "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST")}
             />
           </div>
 

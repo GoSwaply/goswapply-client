@@ -32,7 +32,7 @@ const meterTypes = [
 
 export default function ElectricityPage() {
   const [provider, setProvider] = useState("");
-  const [meterType, setMeterType] = useState("prepaid");
+  const [meterType, setMeterType] = useState<"prepaid" | "postpaid">("prepaid");
   const [meterNumber, setMeterNumber] = useState("");
   const [amount, setAmount] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -54,7 +54,7 @@ export default function ElectricityPage() {
     setIsVerifying(true);
     try {
       const response = await utilitiesAPI.verifyMeter({
-        provider,
+        provider_code: provider,
         meter_number: meterNumber,
         meter_type: meterType,
       });
@@ -90,8 +90,8 @@ export default function ElectricityPage() {
 
     setIsLoading(true);
     try {
-      const response = await utilitiesAPI.payElectricity({
-        provider,
+      const response = await utilitiesAPI.buyElectricity({
+        provider_code: provider,
         meter_number: meterNumber,
         meter_type: meterType,
         amount: parseInt(amount),
@@ -162,7 +162,7 @@ export default function ElectricityPage() {
             options={meterTypes}
             value={meterType}
             onChange={(e) => {
-              setMeterType(e.target.value);
+              setMeterType(e.target.value as "prepaid" | "postpaid");
               setIsVerified(false);
             }}
           />

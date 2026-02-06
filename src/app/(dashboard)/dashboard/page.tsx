@@ -198,10 +198,10 @@ export default function DashboardPage() {
                       <div
                         className={cn(
                           "w-10 h-10 rounded-full flex items-center justify-center",
-                          tx.type === "deposit" ? "bg-green-500/20" : "bg-red-500/20"
+                          tx.transaction_type === "deposit" ? "bg-green-500/20" : "bg-red-500/20"
                         )}
                       >
-                        {tx.type === "deposit" ? (
+                        {tx.transaction_type === "deposit" ? (
                           <ArrowDownLeft className="w-5 h-5 text-green-500" />
                         ) : (
                           <ArrowUpRight className="w-5 h-5 text-red-400" />
@@ -209,7 +209,7 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <p className="font-medium text-foreground capitalize">
-                          {tx.type.replace("_", " ")}
+                          {tx.transaction_type.replace("_", " ")}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {new Date(tx.created_at).toLocaleDateString()}
@@ -221,10 +221,10 @@ export default function DashboardPage() {
                         <p
                           className={cn(
                             "font-semibold",
-                            tx.type === "deposit" ? "text-green-500" : "text-foreground"
+                            tx.transaction_type === "deposit" ? "text-green-500" : "text-foreground"
                           )}
                         >
-                          {tx.type === "deposit" ? "+" : "-"}
+                          {tx.transaction_type === "deposit" ? "+" : "-"}
                           {formatCurrency(tx.amount)}
                         </p>
                         <p className="text-xs text-muted-foreground capitalize">

@@ -10,18 +10,18 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { vtuAPI } from "@/lib/api";
 import { formatCurrency, cn } from "@/lib/utils";
-import { DataPlan } from "@/types";
+import { DataPlan, NetworkProvider } from "@/types";
 
-const networks = [
-  { code: "MTN", name: "MTN Nigeria", color: "bg-yellow-500", logo: "M" },
-  { code: "GLO", name: "Glo", color: "bg-green-600", logo: "G" },
-  { code: "AIRTEL", name: "Airtel", color: "bg-red-600", logo: "A" },
-  { code: "9MOBILE", name: "9mobile", color: "bg-green-500", logo: "9" },
+const networks: { code: NetworkProvider; name: string; color: string; logo: string }[] = [
+  { code: "mtn", name: "MTN Nigeria", color: "bg-yellow-500", logo: "M" },
+  { code: "glo", name: "Glo", color: "bg-green-600", logo: "G" },
+  { code: "airtel", name: "Airtel", color: "bg-red-600", logo: "A" },
+  { code: "9mobile", name: "9mobile", color: "bg-green-500", logo: "9" },
 ];
 
 export default function DataPage() {
-  const [selectedNetwork, setSelectedNetwork] = useState("");
-  const [phone, setPhone] = useState("");
+  const [selectedNetwork, setSelectedNetwork] = useState<NetworkProvider | "">("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [plans, setPlans] = useState<DataPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<DataPlan | null>(null);
   const [pin, setPin] = useState("");
@@ -41,7 +41,7 @@ export default function DataPage() {
     setIsLoadingPlans(true);
     setSelectedPlan(null);
     try {
-      const response = await vtuAPI.getDataPlans(selectedNetwork);
+      const response = await vtuAPI.getDataPlans(selectedNetwork as NetworkProvider);
       setPlans(response.data);
     } catch {
       toast.error("Failed to load data plans");
@@ -55,7 +55,7 @@ export default function DataPage() {
       toast.error("Please select a network");
       return;
     }
-    if (!phone || phone.length !== 11) {
+    if (!phoneNumber || phoneNumber.length !== 11) {
       toast.error("Please enter a valid phone number");
       return;
     }
@@ -75,8 +75,8 @@ export default function DataPage() {
     setIsLoading(true);
     try {
       const response = await vtuAPI.buyData({
-        phone,
-        network: selectedNetwork,
+        phone_number: phoneNumber,
+        network: selectedNetwork as NetworkProvider,
         plan_id: selectedPlan!.id,
         pin,
       });
@@ -94,7 +94,7 @@ export default function DataPage() {
 
   const resetForm = () => {
     setSelectedNetwork("");
-    setPhone("");
+    setPhoneNumber("");
     setSelectedPlan(null);
     setPlans([]);
     setShowSuccessModal(false);
@@ -195,8 +195,8 @@ export default function DataPage() {
             label="Phone Number"
             type="tel"
             placeholder="08012345678"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 11))}
             leftIcon={<Phone className="w-5 h-5" />}
           />
 
@@ -237,7 +237,7 @@ export default function DataPage() {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Phone</span>
-              <span className="text-foreground">{phone}</span>
+              <span className="text-foreground">{phoneNumber}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Plan</span>
@@ -281,7 +281,7 @@ export default function DataPage() {
               Data Purchased!
             </h3>
             <p className="text-muted-foreground">
-              {selectedPlan?.data_amount} data has been sent to {phone}
+              {selectedPlan?.data_amount} data has been sent to {phoneNumber}
             </p>
           </div>
           <div className="glass-card rounded-xl p-4">
