@@ -1,16 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import {
-  ArrowRightIcon,
   SmartphoneIcon,
   ElectricityIcon,
   ShieldIcon,
   TrendingUpIcon,
 } from "@/components/ui/Icons";
-import Button from "@/components/ui/Button";
+import AppStoreButtons from "@/components/ui/AppStoreButtons";
 import ParticlesBackground from "./ParticlesBackground";
+import { publicAPI } from "@/lib/api";
 
 const stats = [
   { label: "Active Users", value: "50K+" },
@@ -27,6 +27,15 @@ const features = [
 ];
 
 export default function Hero() {
+  const [apiLive, setApiLive] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    publicAPI
+      .health()
+      .then(() => setApiLive(true))
+      .catch(() => setApiLive(false));
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
       <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 via-background to-background" />
@@ -41,12 +50,24 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-gold mb-8"
+            className="inline-flex items-center gap-4 mb-8"
           >
-            <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-primary">
-              Nigeria&apos;s Premier Payment Platform
-            </span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-gold">
+              <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+              <span className="text-sm font-medium text-primary">
+                Nigeria&apos;s Premier Payment Platform
+              </span>
+            </div>
+            {apiLive !== null && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-xs font-medium">
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${apiLive ? "bg-emerald-400 animate-pulse" : "bg-red-400"}`}
+                />
+                <span className={apiLive ? "text-emerald-400" : "text-red-400"}>
+                  {apiLive ? "All Systems Live" : "Degraded"}
+                </span>
+              </div>
+            )}
           </motion.div>
 
           <motion.h1
@@ -74,22 +95,18 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+            className="flex flex-col items-center gap-5 mb-16"
           >
-            <Link href="/register">
-              <Button
-                size="lg"
-                rightIcon={<ArrowRightIcon size={20} />}
-                className="text-lg px-8"
-              >
-                Start Now — It&apos;s Free
-              </Button>
-            </Link>
-            <Link href="#services">
-              <Button variant="outline" size="lg" className="text-lg px-8">
-                Explore Services
-              </Button>
-            </Link>
+            <p className="text-sm text-muted-foreground font-medium tracking-wide uppercase">
+              Available on mobile
+            </p>
+            <AppStoreButtons />
+            <a
+              href="#services"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors underline underline-offset-4"
+            >
+              Explore what we offer
+            </a>
           </motion.div>
 
           <motion.div

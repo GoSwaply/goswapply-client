@@ -11,27 +11,28 @@ import {
   InstagramIcon,
   LinkedinIcon,
 } from "@/components/ui/Icons";
+import AppStoreButtons from "@/components/ui/AppStoreButtons";
 
 const footerLinks = {
   services: [
-    { name: "Airtime", href: "/dashboard/airtime" },
-    { name: "Data Bundles", href: "/dashboard/data" },
-    { name: "Electricity", href: "/dashboard/electricity" },
-    { name: "Cable TV", href: "/dashboard/cable" },
-    { name: "Betting", href: "/dashboard/betting" },
-    { name: "Flights", href: "/dashboard/flights" },
+    { name: "Airtime & Data", href: "#services" },
+    { name: "Electricity", href: "#services" },
+    { name: "Cable TV", href: "#services" },
+    { name: "Betting", href: "#services" },
+    { name: "Flights", href: "#services" },
+    { name: "Crypto & Gift Cards", href: "#services" },
   ],
   company: [
-    { name: "About Us", href: "/about" },
-    { name: "Careers", href: "/careers" },
-    { name: "Blog", href: "/blog" },
-    { name: "Contact", href: "/contact" },
+    { name: "About Us", href: "#" },
+    { name: "Careers", href: "#" },
+    { name: "Blog", href: "#" },
+    { name: "Contact", href: "#" },
   ],
   legal: [
-    { name: "Terms of Service", href: "/terms" },
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Cookie Policy", href: "/cookies" },
-    { name: "AML Policy", href: "/aml" },
+    { name: "Terms of Service", href: "#" },
+    { name: "Privacy Policy", href: "#" },
+    { name: "Cookie Policy", href: "#" },
+    { name: "AML Policy", href: "#" },
   ],
 };
 
@@ -60,7 +61,7 @@ export default function Footer() {
               Nigeria&apos;s premier payment platform for airtime, data, bills,
               crypto, gift cards, and more.
             </p>
-            <div className="space-y-3">
+            <div className="space-y-3 mb-6">
               <div className="flex items-center gap-3 text-muted-foreground">
                 <EmailIcon size={20} />
                 <span>support@swaply.ng</span>
@@ -74,6 +75,7 @@ export default function Footer() {
                 <span>Lagos, Nigeria</span>
               </div>
             </div>
+            <AppStoreButtons layout="col" />
           </div>
 
           <div>

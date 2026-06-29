@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { MenuIcon, XIcon, WalletIcon, ArrowRightIcon } from "@/components/ui/Icons";
-import Button from "@/components/ui/Button";
+import { MenuIcon, XIcon, WalletIcon } from "@/components/ui/Icons";
+import AppStoreButtons from "@/components/ui/AppStoreButtons";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -54,15 +54,8 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
-            <Link href="/login">
-              <Button variant="ghost">Sign In</Button>
-            </Link>
-            <Link href="/register">
-              <Button rightIcon={<ArrowRightIcon size={16} />}>
-                Get Started
-              </Button>
-            </Link>
+          <div className="hidden md:flex items-center">
+            <AppStoreButtons />
           </div>
 
           <button
@@ -93,17 +86,8 @@ export default function Navbar() {
                   {link.name}
                 </a>
               ))}
-              <div className="pt-4 border-t border-border space-y-3">
-                <Link href="/login" className="block">
-                  <Button variant="outline" className="w-full">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/register" className="block">
-                  <Button className="w-full" rightIcon={<ArrowRightIcon size={16} />}>
-                    Get Started
-                  </Button>
-                </Link>
+              <div className="pt-4 border-t border-border">
+                <AppStoreButtons layout="col" className="w-full" />
               </div>
             </div>
           </motion.div>
