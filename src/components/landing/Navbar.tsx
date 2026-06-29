@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { MenuIcon, XIcon, WalletIcon } from "@/components/ui/Icons";
+import { MenuIcon, XIcon } from "@/components/ui/Icons";
 import AppStoreButtons from "@/components/ui/AppStoreButtons";
 import { cn } from "@/lib/utils";
 
@@ -35,11 +36,15 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
-              <WalletIcon size={24} />
-            </div>
-            <span className="text-2xl font-bold text-gradient-gold">Swaply</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="https://res.cloudinary.com/deioo5lrm/image/upload/v1782721221/logo_wwjh5o.jpg"
+              alt="Swaply"
+              width={120}
+              height={40}
+              className="h-10 w-auto object-contain"
+              priority
+            />
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import axios from "axios";
-import { WalletIcon } from "@/components/ui/Icons";
 import { accountAPI, authAPI } from "@/lib/api";
 
 type Step = "form" | "success";
@@ -49,11 +49,14 @@ export default function DeleteAccountPage() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Minimal nav */}
       <nav className="border-b border-border px-6 py-4">
-        <Link href="/" className="inline-flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg gradient-gold flex items-center justify-center">
-            <WalletIcon size={18} />
-          </div>
-          <span className="text-lg font-bold text-gradient-gold">Swaply</span>
+        <Link href="/" className="inline-flex">
+          <Image
+            src="https://res.cloudinary.com/deioo5lrm/image/upload/v1782721221/logo_wwjh5o.jpg"
+            alt="Swaply"
+            width={100}
+            height={34}
+            className="h-9 w-auto object-contain"
+          />
         </Link>
       </nav>
 
