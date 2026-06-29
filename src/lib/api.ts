@@ -150,6 +150,17 @@ export const exchangeAPI = {
 };
 
 // ==========================================
+// ACCOUNT DELETION
+// ==========================================
+export const accountAPI = {
+  deleteAccount: (accessToken: string) =>
+    axios.delete(`${API_BASE_URL}/users/me`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      withCredentials: true,
+    }),
+};
+
+// ==========================================
 // KYC API
 // ==========================================
 export const kycAPI = {

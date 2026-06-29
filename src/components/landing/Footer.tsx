@@ -33,6 +33,7 @@ const footerLinks = {
     { name: "Privacy Policy", href: "#" },
     { name: "Cookie Policy", href: "#" },
     { name: "AML Policy", href: "#" },
+    { name: "Delete Account", href: "/delete-account" },
   ],
 };
 
