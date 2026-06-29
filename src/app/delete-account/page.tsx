@@ -55,7 +55,7 @@ export default function DeleteAccountPage() {
             alt="Swaply"
             width={100}
             height={34}
-            className="h-9 w-auto object-contain"
+            className="h-9 w-auto object-contain rounded-full"
           />
         </Link>
       </nav>
