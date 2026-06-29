@@ -27,7 +27,7 @@ const features = [
 ];
 
 export default function Hero() {
-  const [apiLive, setApiLive] = useState<boolean | null>(null);
+  const [apiLive, setApiLive] = useState(false);
 
   useEffect(() => {
     publicAPI
@@ -58,14 +58,10 @@ export default function Hero() {
                 Nigeria&apos;s Premier Payment Platform
               </span>
             </div>
-            {apiLive !== null && (
+            {apiLive && (
               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-xs font-medium">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${apiLive ? "bg-emerald-400 animate-pulse" : "bg-red-400"}`}
-                />
-                <span className={apiLive ? "text-emerald-400" : "text-red-400"}>
-                  {apiLive ? "All Systems Live" : "Degraded"}
-                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-emerald-400">All Systems Live</span>
               </div>
             )}
           </motion.div>
