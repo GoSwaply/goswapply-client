@@ -30,7 +30,7 @@ const footerLinks = {
   ],
   legal: [
     { name: "Terms of Service", href: "#" },
-    { name: "Privacy Policy", href: "#" },
+    { name: "Privacy Policy", href: "/privacy" },
     { name: "Cookie Policy", href: "#" },
     { name: "AML Policy", href: "#" },
     { name: "Delete Account", href: "/delete-account" },

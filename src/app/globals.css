@@ -187,3 +187,19 @@ body {
 
 .card-hover { transition: all 0.3s ease; }
 .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(212, 175, 55, 0.1); }
+
+/* Legal page typography */
+.prose-legal h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.prose-legal p { margin-bottom: 0.75rem; }
+.prose-legal strong { color: var(--foreground); font-weight: 600; }
+.prose-legal a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+.prose-legal a:hover { color: var(--gold-300); }
+.prose-legal table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+.prose-legal th, .prose-legal td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+.prose-legal th { background: rgba(212, 175, 55, 0.08); color: var(--foreground); font-weight: 600; }
