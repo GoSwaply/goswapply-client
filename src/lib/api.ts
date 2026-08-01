@@ -41,29 +41,82 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+/**
+ * A dashboard mount fires several requests at once. If the access token has
+ * expired they all 401 together, and refreshing once per failure both wastes
+ * the server's rate-limit budget and races to write the same cookie. Every
+ * caller therefore awaits one shared in-flight refresh.
+ */
+let refreshInFlight: Promise<string> | null = null;
+
+function refreshAccessToken(): Promise<string> {
+  if (!refreshInFlight) {
+    refreshInFlight = axios
+      // refresh_token lives in an httpOnly cookie — the server reads it itself
+      .post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
+      .then((response) => {
+        const accessToken: string | undefined = response.data?.accessToken;
+        if (!accessToken) throw new Error("Refresh response had no accessToken");
+        Cookies.set("access_token", accessToken, {
+          expires: 1,
+          sameSite: "Lax",
+        });
+        return accessToken;
+      })
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+  return refreshInFlight;
+}
+
+/** Clears local session state and sends the user to sign in. */
+function endSession() {
+  Cookies.remove("access_token");
+  Cookies.remove("refresh_token");
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("auth-storage");
+  // Public pages must not bounce — only pull the user out of a guarded view.
+  const publicPaths = ["/", "/login", "/register", "/privacy", "/delete-account"];
+  if (!publicPaths.includes(window.location.pathname)) {
+    window.location.href = "/login";
+  }
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        // refresh_token lives in httpOnly cookie — server reads it automatically
-        const response = await axios.post(
-          `${API_BASE_URL}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
-        const { accessToken } = response.data;
-        Cookies.set("access_token", accessToken, { sameSite: "strict" });
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return api(originalRequest);
-      } catch {
-        Cookies.remove("access_token");
-        if (typeof window !== "undefined") window.location.href = "/";
-      }
+    const status = error.response?.status;
+
+    if (status !== 401 || !originalRequest || originalRequest._retry) {
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
+    // Never try to refresh a failed refresh — that is the terminal case.
+    if (String(originalRequest.url ?? "").includes("/auth/refresh")) {
+      endSession();
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+
+    try {
+      const accessToken = await refreshAccessToken();
+      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+      return api(originalRequest);
+    } catch (refreshError: unknown) {
+      const refreshStatus = (
+        refreshError as { response?: { status?: number } }
+      )?.response?.status;
+
+      // Only a definitive rejection means the session is really gone. A 429,
+      // a 5xx or a dropped connection is transient — destroying the session
+      // there logs out a user who is still perfectly valid.
+      if (refreshStatus === 401 || refreshStatus === 403) {
+        endSession();
+      }
+      return Promise.reject(error);
+    }
   }
 );
 
@@ -79,7 +132,14 @@ export const publicAPI = {
 // AUTHENTICATION API
 // ==========================================
 export const authAPI = {
-  register: (data: RegisterRequest) => api.post("/auth/register", data),
+  register: (data: any) =>
+    api.post("/auth/register", {
+      firstName: data.firstName || data.first_name,
+      lastName: data.lastName || data.last_name,
+      email: data.email,
+      phoneNumber: data.phoneNumber || data.phone_number,
+      password: data.password,
+    }),
   verifyOtp: (data: OTPVerifyRequest) => api.post("/auth/verify-otp", data),
   resendOtp: (data: OTPRequest) => api.post("/auth/resend-otp", data),
   login: (data: LoginRequest) => api.post("/auth/login", data),
@@ -176,8 +236,11 @@ export const walletAPI = {
   getWallet: () => api.get("/wallet/balance"),
   getBalance: () => api.get("/wallet/balance"),
   getSummary: () => api.get("/wallet/balance"),
-  getTransactions: (params?: TransactionFilter) => api.get("/wallet/transactions", { params }),
-  getTransaction: (reference: string) => api.get(`/wallet/transactions/${reference}`),
+  // The API mounts TransactionsController at /api/v1/transactions.
+  // "/wallet/transactions" exists server-side but only WITHOUT the /api/v1 prefix,
+  // so calling it through this client's baseURL 404s.
+  getTransactions: (params?: TransactionFilter) => api.get("/transactions", { params }),
+  getTransaction: (reference: string) => api.get(`/transactions/${reference}`),
   getFundingAccounts: () => api.get("/wallet/funding-accounts"),
   withdraw: (data: WithdrawRequest) => api.post("/wallet/withdraw", data),
   transfer: (data: TransferRequest) => api.post("/wallet/transfer", data),
@@ -188,35 +251,67 @@ export const walletAPI = {
 };
 
 export const vtuAPI = {
-  getNetworks: () => api.get("/vas/networks"),
-  getNetworkDiscounts: () => api.get("/vas/discounts"),
-  buyAirtime: (data: BuyAirtimeRequest) => api.post("/vas/airtime", data),
-  getAirtimeHistory: (params?: TransactionFilter) => api.get("/vas/airtime/history", { params }),
-  getDataPlans: (network?: NetworkProvider) => api.get("/vas/data/plans", { params: { network } }),
-  buyData: (data: BuyDataRequest) => api.post("/vas/data", data),
-  getDataHistory: (params?: TransactionFilter) => api.get("/vas/data/history", { params }),
+  getNetworks: () => api.get("/services/meta"),
+  getNetworkDiscounts: () => api.get("/services/meta"),
+  buyAirtime: (data: any) =>
+    api.post("/services/airtime", {
+      phoneNumber: data.phoneNumber || data.phone_number,
+      network: data.network,
+      amount: Number(data.amount),
+    }),
+  getAirtimeHistory: (params?: TransactionFilter) => api.get("/wallet/transactions", { params }),
+  getDataPlans: (network?: NetworkProvider) =>
+    api.get(`/services/data-bundles/${network || "mtn"}`),
+  buyData: (data: any) =>
+    api.post("/services/data", {
+      phoneNumber: data.phoneNumber || data.phone_number,
+      planCode: data.planCode || data.plan_id || "1GB",
+      network: data.network,
+      amount: Number(data.amount || 500),
+    }),
+  getDataHistory: (params?: TransactionFilter) => api.get("/wallet/transactions", { params }),
 };
 
 export const utilitiesAPI = {
-  getElectricityProviders: () => api.get("/vas/electricity/providers"),
-  verifyMeter: (data: { provider_code: string; meter_number: string; meter_type: "prepaid" | "postpaid" }) =>
-    api.post("/vas/electricity/validate", data),
-  buyElectricity: (data: BuyElectricityRequest) => api.post("/vas/electricity", data),
-  getElectricityHistory: (params?: TransactionFilter) => api.get("/vas/electricity/history", { params }),
-  getTVProviders: () => api.get("/vas/tv/providers"),
-  getTVPlans: (provider_code: string) => api.get("/vas/tv/plans", { params: { provider_code } }),
-  verifySmartcard: (data: { provider_code: string; smartcard_number: string }) =>
-    api.post("/vas/tv/validate", data),
-  buyTV: (data: BuyTVRequest) => api.post("/vas/tv", data),
-  getTVHistory: (params?: TransactionFilter) => api.get("/vas/tv/history", { params }),
+  getElectricityProviders: () => api.get("/services/meta"),
+  verifyMeter: (data: any) =>
+    api.post("/services/electricity/validate", {
+      meterNumber: data.meterNumber || data.meter_number,
+      disco: data.disco || data.provider_code || "eedc",
+      meterType: data.meterType || data.meter_type || "prepaid",
+    }),
+  buyElectricity: (data: any) =>
+    api.post("/services/electricity", {
+      meterNumber: data.meterNumber || data.meter_number,
+      disco: data.disco || data.provider_code || "eedc",
+      meterType: data.meterType || data.meter_type || "prepaid",
+      amount: Number(data.amount),
+    }),
+  getElectricityHistory: (params?: TransactionFilter) => api.get("/wallet/transactions", { params }),
+  getTVProviders: () => api.get("/services/meta"),
+  getTVPlans: (provider_code: string) =>
+    api.get(`/services/tv-plans/${provider_code || "dstv"}`),
+  verifySmartcard: (data: any) =>
+    api.post("/services/tv/validate", {
+      providerId: data.providerId || data.provider_code || "dstv",
+      smartcardNumber: data.smartcardNumber || data.smartcard_number,
+    }),
+  buyTV: (data: any) =>
+    api.post("/services/tv", {
+      smartcardNumber: data.smartcardNumber || data.smartcard_number,
+      planCode: data.planCode || data.plan_id || "dstv-padi",
+      provider: data.provider || data.provider_code || "dstv",
+      amount: Number(data.amount || 3600),
+    }),
+  getTVHistory: (params?: TransactionFilter) => api.get("/wallet/transactions", { params }),
 };
 
 export const bettingAPI = {
-  getProviders: () => api.get("/vas/betting/providers"),
+  getProviders: () => api.get("/services/meta"),
   verifyCustomer: (data: { provider_code: string; customer_id: string }) =>
-    api.post("/vas/betting/validate", data),
-  fundAccount: (data: FundBettingRequest) => api.post("/vas/betting", data),
-  getBettingHistory: (params?: TransactionFilter) => api.get("/vas/betting/history", { params }),
+    api.post("/services/meta"),
+  fundAccount: (data: FundBettingRequest) => api.post("/services/airtime", data),
+  getBettingHistory: (params?: TransactionFilter) => api.get("/wallet/transactions", { params }),
 };
 
 export const cryptoAPI = {

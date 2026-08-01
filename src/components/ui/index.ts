@@ -3,3 +3,5 @@ export { default as Input } from "./Input";
 export { default as Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "./Card";
 export { default as Select } from "./Select";
 export { default as Modal } from "./Modal";
+export { default as ErrorState } from "./ErrorState";
+export { default as EmptyState } from "./EmptyState";
