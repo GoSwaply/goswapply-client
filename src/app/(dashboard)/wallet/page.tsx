@@ -20,6 +20,9 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
 import { useWalletStore } from "@/store/wallet";
+import ErrorState from "@/components/ui/ErrorState";
+import EmptyState from "@/components/ui/EmptyState";
+import { normalizeError, toToastMessage, type AppError } from "@/lib/errors";
 import { walletAPI } from "@/lib/api";
 import { formatCurrency, cn } from "@/lib/utils";
 import { Transaction } from "@/types";
@@ -37,9 +40,17 @@ const transactionTypes = [
 ];
 
 export default function WalletPage() {
-  const { wallet, fundingAccounts, fetchWallet } = useWalletStore();
+  const { wallet, fundingAccounts, fetchWallet, fetchFundingAccounts } =
+    useWalletStore();
+  // Only provider-confirmed accounts are payable.
+  const activeAccounts = fundingAccounts.filter(
+    (a) => a.status === "ACTIVE" && a.accountNumber
+  );
+  const hasPendingAccount = fundingAccounts.some((a) => a.status === "PENDING");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [txError, setTxError] = useState<AppError | null>(null);
+  const [provisioningTimedOut, setProvisioningTimedOut] = useState(false);
   const [showFundModal, setShowFundModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [filterType, setFilterType] = useState("");
@@ -54,15 +65,45 @@ export default function WalletPage() {
     fetchTransactions();
   }, [filterType]);
 
+  /**
+   * Account assignment is asynchronous — the provider confirms by webhook after
+   * we have already responded. Poll while anything is PENDING so the user is
+   * not left staring at a spinner, and give up rather than polling forever.
+   */
+  useEffect(() => {
+    if (!showFundModal || !hasPendingAccount) return;
+
+    let attempts = 0;
+    const MAX_ATTEMPTS = 20; // ~60s at 3s intervals
+    const timer = setInterval(() => {
+      attempts += 1;
+      if (attempts > MAX_ATTEMPTS) {
+        clearInterval(timer);
+        setProvisioningTimedOut(true);
+        return;
+      }
+      fetchFundingAccounts();
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [showFundModal, hasPendingAccount, fetchFundingAccounts]);
+
   const fetchTransactions = async () => {
     setIsLoading(true);
     try {
       const params: Record<string, unknown> = { page_size: 50 };
       if (filterType) params.transaction_type = filterType;
       const response = await walletAPI.getTransactions(params);
-      setTransactions(response.data.results || response.data);
-    } catch {
-      toast.error("Failed to fetch transactions");
+      const payload = response.data;
+      // An empty list is a successful result, not a failure.
+      setTransactions(
+        Array.isArray(payload) ? payload : payload?.results ?? payload?.data ?? []
+      );
+      setTxError(null);
+    } catch (error: unknown) {
+      // Render this inline instead of a toast — a failed list needs a retry
+      // affordance, and the user must not mistake it for "you have none".
+      setTxError(normalizeError(error, { resource: "transactions" }));
     } finally {
       setIsLoading(false);
     }
@@ -96,8 +137,19 @@ export default function WalletPage() {
       fetchWallet();
       fetchTransactions();
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err.response?.data?.message || "Withdrawal failed");
+      const appError = normalizeError(error, {
+        isWrite: true,
+        resource: "withdrawal",
+      });
+      // A timeout or 5xx on a withdrawal may still have moved the money.
+      // Never say "failed" unless the server actually rejected it.
+      if (appError.outcomeUnknown) {
+        toast.error(toToastMessage(appError), { duration: 10000 });
+        fetchWallet();
+        fetchTransactions();
+      } else {
+        toast.error(toToastMessage(appError));
+      }
     } finally {
       setIsWithdrawing(false);
     }
@@ -230,6 +282,8 @@ export default function WalletPage() {
             <div className="flex items-center justify-center py-12">
               <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
+          ) : txError ? (
+            <ErrorState error={txError} onRetry={fetchTransactions} />
           ) : filteredTransactions.length > 0 ? (
             <div className="space-y-3">
               {filteredTransactions.map((tx) => (
@@ -284,10 +338,19 @@ export default function WalletPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <Wallet className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No transactions found</p>
-            </div>
+            <EmptyState
+              icon={Wallet}
+              title={
+                searchQuery || filterType
+                  ? "No matching transactions"
+                  : "No transactions yet"
+              }
+              description={
+                searchQuery || filterType
+                  ? "Try clearing your filters or searching for something else."
+                  : "Fund your wallet to start transacting. Your activity will appear here."
+              }
+            />
           )}
         </CardContent>
       </Card>
@@ -303,17 +366,17 @@ export default function WalletPage() {
             Transfer to any of these accounts to fund your wallet instantly.
           </p>
 
-          {fundingAccounts.length > 0 ? (
+          {activeAccounts.length > 0 ? (
             <div className="space-y-4">
-              {fundingAccounts.map((account) => (
+              {activeAccounts.map((account) => (
                 <div
-                  key={account.id}
+                  key={account.accountNumber}
                   className="glass-card rounded-xl p-4 space-y-3"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Bank</span>
                     <span className="text-foreground font-medium">
-                      {account.bank_name}
+                      {account.bankName}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -322,10 +385,10 @@ export default function WalletPage() {
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-foreground font-mono font-bold">
-                        {account.account_number}
+                        {account.accountNumber}
                       </span>
                       <button
-                        onClick={() => copyAccountNumber(account.account_number)}
+                        onClick={() => copyAccountNumber(account.accountNumber!)}
                         className="p-1 hover:bg-muted rounded"
                       >
                         <Copy className="w-4 h-4 text-primary" />
@@ -337,23 +400,47 @@ export default function WalletPage() {
                       Account Name
                     </span>
                     <span className="text-foreground">
-                      {account.account_name}
+                      {account.accountName}
                     </span>
                   </div>
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-8">
+          ) : hasPendingAccount && !provisioningTimedOut ? (
+            /* Assignment is asynchronous — never show an unconfirmed number. */
+            <div className="text-center py-8 space-y-2">
+              <div className="w-8 h-8 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin" />
               <p className="text-muted-foreground">
-                No funding accounts available. Please contact support.
+                We are setting up your dedicated account.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                This usually takes under a minute.
               </p>
             </div>
+          ) : hasPendingAccount ? (
+            <EmptyState
+              title="Still setting up your account"
+              description="This is taking longer than usual. Your account is not ready yet — please check back in a few minutes."
+              action={{
+                label: "Check again",
+                onClick: () => {
+                  setProvisioningTimedOut(false);
+                  fetchFundingAccounts();
+                },
+              }}
+            />
+          ) : (
+            <EmptyState
+              title="No funding account yet"
+              description="We could not set up your dedicated account. Please contact support if this persists."
+            />
           )}
 
-          <p className="text-xs text-muted-foreground text-center">
-            Your wallet will be credited automatically after transfer.
-          </p>
+          {activeAccounts.length > 0 && (
+            <p className="text-xs text-muted-foreground text-center">
+              Transfers to this account are credited to your wallet automatically.
+            </p>
+          )}
         </div>
       </Modal>
 

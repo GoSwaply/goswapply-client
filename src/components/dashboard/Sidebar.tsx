@@ -26,20 +26,19 @@ import { useAuthStore } from "@/store/auth";
 
 const menuItems = [
   { icon: DashboardIcon, label: "Dashboard", href: "/dashboard" },
-  { icon: WalletIcon, label: "Wallet", href: "/dashboard/wallet" },
-  { icon: AirtimeIcon, label: "Airtime", href: "/dashboard/airtime" },
-  { icon: DataIcon, label: "Data Bundles", href: "/dashboard/data" },
-  { icon: ElectricityIcon, label: "Electricity", href: "/dashboard/electricity" },
-  { icon: CableTVIcon, label: "Cable TV", href: "/dashboard/cable" },
-  { icon: BettingIcon, label: "Betting", href: "/dashboard/betting" },
-  { icon: FlightsIcon, label: "Flights", href: "/dashboard/flights" },
-  { icon: GiftCardIcon, label: "Gift Cards", href: "/dashboard/giftcards" },
-  { icon: CryptoIcon, label: "Crypto", href: "/dashboard/crypto" },
+  { icon: WalletIcon, label: "Wallet", href: "/wallet" },
+  { icon: AirtimeIcon, label: "Airtime", href: "/airtime" },
+  { icon: DataIcon, label: "Data Bundles", href: "/data" },
+  { icon: ElectricityIcon, label: "Electricity", href: "/electricity" },
+  { icon: CableTVIcon, label: "Cable TV", href: "/cable" },
+  { icon: BettingIcon, label: "Betting", href: "/betting" },
+  { icon: FlightsIcon, label: "Flights", href: "/flights" },
+  { icon: GiftCardIcon, label: "Gift Cards", href: "/giftcards" },
+  { icon: CryptoIcon, label: "Crypto", href: "/crypto" },
 ];
 
 const bottomMenuItems = [
-  { icon: UserIcon, label: "Profile", href: "/dashboard/profile" },
-  { icon: SettingsIcon, label: "Settings", href: "/dashboard/settings" },
+  { icon: UserIcon, label: "Profile", href: "/profile" },
 ];
 
 export default function Sidebar() {

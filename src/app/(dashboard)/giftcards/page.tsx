@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Gift, Upload, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
+import { Gift, Upload, ArrowRight, CheckCircle, Loader2, ShieldCheck, CreditCard } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
 import { giftcardsAPI } from "@/lib/api";
 import { formatCurrency, cn } from "@/lib/utils";
@@ -46,6 +45,8 @@ export default function GiftCardsPage() {
       } else {
         setCalculatedAmount(0);
       }
+    } else {
+      setCalculatedAmount(0);
     }
   }, [selectedRate, amount]);
 
@@ -144,7 +145,7 @@ export default function GiftCardsPage() {
           Sell Gift Cards
         </h1>
         <p className="text-muted-foreground">
-          Convert your gift cards to Naira instantly
+          Convert gift cards to Naira with verified exchange rates & atomic settlement
         </p>
       </div>
 
@@ -292,10 +293,14 @@ export default function GiftCardsPage() {
             </div>
 
             {calculatedAmount > 0 && (
-              <div className="glass-card rounded-xl p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">You will receive</span>
-                  <span className="text-2xl font-bold text-gradient-gold">
+              <div className="glass-card rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Exchange Rate</span>
+                  <span className="text-foreground font-mono">{formatCurrency(selectedRate.rate_per_dollar)} / USD</span>
+                </div>
+                <div className="border-t border-border pt-2 flex items-center justify-between">
+                  <span className="font-medium text-foreground">Estimated Payout</span>
+                  <span className="text-2xl font-bold text-gradient-gold font-mono">
                     {formatCurrency(calculatedAmount)}
                   </span>
                 </div>
@@ -318,7 +323,7 @@ export default function GiftCardsPage() {
       <Modal
         isOpen={showSuccessModal}
         onClose={resetForm}
-        title="Submitted!"
+        title="Gift Card Submitted"
         showClose={false}
       >
         <div className="text-center space-y-6">
@@ -326,17 +331,29 @@ export default function GiftCardsPage() {
             <CheckCircle className="w-10 h-10 text-green-500" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-foreground mb-2">
+            <h3 className="text-xl font-bold text-foreground mb-1">
               Card Submitted for Review
             </h3>
-            <p className="text-muted-foreground">
-              Your gift card is being reviewed. You&apos;ll receive payment once
-              approved.
+            <p className="text-sm text-muted-foreground">
+              Your card image is queued for review. Payout will be credited atomically to your wallet once approved.
             </p>
           </div>
+
+          <div className="bg-muted/50 rounded-xl p-4 text-left space-y-3 text-sm">
+            <div className="flex items-center gap-2 text-green-500 font-medium">
+              <CheckCircle className="w-4 h-4" /> 1. Gift Card Image Uploaded
+            </div>
+            <div className="flex items-center gap-2 text-primary font-medium">
+              <Loader2 className="w-4 h-4 animate-spin" /> 2. Gift Card Code & Balance Verification
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <ShieldCheck className="w-4 h-4" /> 3. Atomic Wallet Settlement & Credit
+            </div>
+          </div>
+
           <div className="glass-card rounded-xl p-4">
-            <p className="text-sm text-muted-foreground">Reference</p>
-            <p className="text-foreground font-mono">{transactionRef}</p>
+            <p className="text-xs text-muted-foreground mb-1">Reference</p>
+            <p className="text-foreground font-mono font-bold text-sm">{transactionRef}</p>
           </div>
           <Button className="w-full" onClick={resetForm}>
             Done
