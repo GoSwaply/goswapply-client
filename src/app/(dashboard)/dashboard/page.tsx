@@ -23,18 +23,20 @@ import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { useAuthStore } from "@/store/auth";
 import { useWalletStore } from "@/store/wallet";
+import ErrorState from "@/components/ui/ErrorState";
+import EmptyState from "@/components/ui/EmptyState";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 const quickActions = [
-  { icon: AirtimeIcon, label: "Airtime", href: "/dashboard/airtime" },
-  { icon: DataIcon, label: "Data", href: "/dashboard/data" },
-  { icon: ElectricityIcon, label: "Electricity", href: "/dashboard/electricity" },
-  { icon: CableTVIcon, label: "Cable TV", href: "/dashboard/cable" },
-  { icon: BettingIcon, label: "Betting", href: "/dashboard/betting" },
-  { icon: FlightsIcon, label: "Flights", href: "/dashboard/flights" },
-  { icon: GiftCardIcon, label: "Gift Cards", href: "/dashboard/giftcards" },
-  { icon: CryptoIcon, label: "Crypto", href: "/dashboard/crypto" },
+  { icon: AirtimeIcon, label: "Airtime", href: "/airtime" },
+  { icon: DataIcon, label: "Data", href: "/data" },
+  { icon: ElectricityIcon, label: "Electricity", href: "/electricity" },
+  { icon: CableTVIcon, label: "Cable TV", href: "/cable" },
+  { icon: BettingIcon, label: "Betting", href: "/betting" },
+  { icon: FlightsIcon, label: "Flights", href: "/flights" },
+  { icon: GiftCardIcon, label: "Gift Cards", href: "/giftcards" },
+  { icon: CryptoIcon, label: "Crypto", href: "/crypto" },
 ];
 
 const containerVariants = {
@@ -52,7 +54,8 @@ const itemVariants = {
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-  const { wallet, transactions, fetchTransactions } = useWalletStore();
+  const { wallet, transactions, transactionsState, fetchTransactions } =
+    useWalletStore();
 
   useEffect(() => {
     fetchTransactions({ limit: 5 });
@@ -88,7 +91,7 @@ export default function DashboardPage() {
     >
       <motion.div variants={itemVariants}>
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-          {getGreeting()}, {user?.first_name}!
+          {getGreeting()}, {user?.first_name || "User"}!
         </h1>
         <p className="text-muted-foreground">
           Here&apos;s an overview of your account activity.
@@ -112,13 +115,18 @@ export default function DashboardPage() {
                     </p>
                   )}
                 </div>
-                <div className="flex gap-3">
-                  <Link href="/dashboard/wallet?action=fund">
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/wallet?action=fund">
                     <Button leftIcon={<ArrowDownLeft className="w-4 h-4" />}>
-                      Fund
+                      Fund Wallet
                     </Button>
                   </Link>
-                  <Link href="/dashboard/wallet?action=withdraw">
+                  <Link href="/wallet?action=transfer">
+                    <Button variant="secondary" leftIcon={<ArrowRightIcon size={16} />}>
+                      Transfer
+                    </Button>
+                  </Link>
+                  <Link href="/wallet?action=withdraw">
                     <Button
                       variant="outline"
                       leftIcon={<ArrowUpRight className="w-4 h-4" />}
@@ -187,7 +195,22 @@ export default function DashboardPage() {
             </Link>
           </CardHeader>
           <CardContent>
-            {transactions && transactions.length > 0 ? (
+            {transactionsState.status === "loading" ? (
+              <div className="space-y-4" aria-busy="true">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="h-20 rounded-xl bg-muted/40 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : transactionsState.status === "error" && transactionsState.error ? (
+              /* Could not load — distinct from having nothing to show. */
+              <ErrorState
+                error={transactionsState.error}
+                onRetry={() => fetchTransactions({ limit: 5 })}
+              />
+            ) : transactions && transactions.length > 0 ? (
               <div className="space-y-4">
                 {transactions.slice(0, 5).map((tx) => (
                   <div
@@ -237,15 +260,11 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 opacity-50">
-                  <WalletIcon size={64} />
-                </div>
-                <p className="text-muted-foreground">No transactions yet</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Fund your wallet to start transacting
-                </p>
-              </div>
+              /* Loaded successfully with nothing in it — a normal state. */
+              <EmptyState
+                title="No transactions yet"
+                description="Fund your wallet to start transacting. Your activity will appear here."
+              />
             )}
           </CardContent>
         </Card>

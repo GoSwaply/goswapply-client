@@ -114,16 +114,18 @@ export type TransactionStatus =
   | "cancelled"
   | "refunded";
 
+export type VirtualAccountStatus = "PENDING" | "ACTIVE" | "FAILED";
+
+/**
+ * A provider-issued dedicated account. `accountNumber` is null unless
+ * `status === "ACTIVE"` — assignment is asynchronous and an unconfirmed
+ * number must never be shown as payable.
+ */
 export interface FundingAccount {
-  id: string;
-  wallet: string;
-  bank_name: string;
-  account_number: string;
-  account_name: string;
-  provider: string;
-  provider_reference?: string;
-  is_active: boolean;
-  created_at: string;
+  status: VirtualAccountStatus;
+  bankName: string | null;
+  accountNumber: string | null;
+  accountName: string | null;
 }
 
 export interface PaystackDVA {
