@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Decorative background lattice for the auth split-screen. Tiles seamlessly
+       and inherits opacity from the element, so it works on light and dark. -->
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0v32" fill="none" stroke="currentColor" stroke-width="1" opacity="0.35"/>
+    </pattern>
+  </defs>
+  <rect width="64" height="64" fill="url(#grid)" stroke="none"/>
+</svg>

@@ -21,7 +21,33 @@ import type {
   NetworkProvider,
 } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+const PRODUCTION_API_URL = "https://api.goswaply.com/api/v1";
+const LOCAL_API_URL = "http://localhost:3000/api/v1";
+
+/**
+ * Resolves the API origin.
+ *
+ * NEXT_PUBLIC_* values are inlined at build time, so a production build made
+ * without NEXT_PUBLIC_API_URL set previously shipped the localhost default —
+ * every request from the live site then failed with ERR_CONNECTION_REFUSED.
+ * When we are demonstrably not on a developer machine, fall back to the
+ * production API rather than to localhost.
+ */
+function resolveApiBaseUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (configured) return configured;
+
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    const isLocal =
+      host === "localhost" || host === "127.0.0.1" || host === "[::1]";
+    if (!isLocal) return PRODUCTION_API_URL;
+  }
+
+  return LOCAL_API_URL;
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 const API_ROOT_URL = API_BASE_URL.replace(/\/api\/v1$/, "");
 
 export const api = axios.create({
