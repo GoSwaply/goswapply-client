@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { EmailIcon, LockIcon, UserIcon, PhoneIcon, ArrowRightIcon, ArrowLeftIcon, GiftIcon } from "@/components/ui/Icons";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,9 +10,13 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
 import { useAuthStore } from "@/store/auth";
+import { markReturningVisitor, postAuthDestination } from "@/lib/auth-intent";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // Where the visitor was heading before we asked them to authenticate.
+  const next = postAuthDestination(searchParams.get("next"));
   const { register, isLoading, error, clearError } = useAuthStore();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -88,8 +92,21 @@ export default function RegisterPage() {
         password: formData.password,
         referral_code: formData.referral_code || undefined,
       });
-      toast.success("Account created successfully!");
-      router.push("/dashboard");
+      markReturningVisitor();
+
+      // The API only issues tokens once the emailed OTP is verified, so a new
+      // account is not signed in yet. Send them to sign in rather than to the
+      // dashboard, which would bounce them straight back out.
+      const signedIn = useAuthStore.getState().isAuthenticated;
+      if (signedIn) {
+        toast.success("Account created successfully!");
+        router.push(next);
+      } else {
+        toast.success(
+          "Account created. Check your email for the verification code, then sign in."
+        );
+        router.push(`/login?next=${encodeURIComponent(next)}`);
+      }
     } catch {
       toast.error(error || "Registration failed. Please try again.");
     }
@@ -321,11 +338,32 @@ export default function RegisterPage() {
       <div className="mt-6 text-center">
         <p className="text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="text-primary hover:underline font-medium">
+          <Link
+            href={`/login?next=${encodeURIComponent(next)}`}
+            className="text-primary hover:underline font-medium"
+          >
             Sign In
           </Link>
         </p>
       </div>
     </Card>
+  );
+}
+
+/**
+ * useSearchParams opts this subtree into client-side rendering, so Next
+ * requires a Suspense boundary around it for the page to prerender.
+ */
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+      <div className="flex items-center justify-center py-16">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+      }
+    >
+      <RegisterForm />
+    </Suspense>
   );
 }

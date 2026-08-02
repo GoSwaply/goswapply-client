@@ -1,17 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { EmailIcon, LockIcon, ArrowRightIcon } from "@/components/ui/Icons";
 import { toast } from "react-hot-toast";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
 import { useAuthStore } from "@/store/auth";
+import { markReturningVisitor, postAuthDestination } from "@/lib/auth-intent";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // Where the visitor was heading before we asked them to authenticate.
+  const next = postAuthDestination(searchParams.get("next"));
   const { login, isLoading, error, clearError } = useAuthStore();
   const [formData, setFormData] = useState({
     email: "",
@@ -33,8 +37,9 @@ export default function LoginPage() {
 
     try {
       await login(formData.email, formData.password);
+      markReturningVisitor();
       toast.success("Welcome back!");
-      router.push("/dashboard");
+      router.push(next);
     } catch {
       toast.error(error || "Login failed. Please try again.");
     }
@@ -102,7 +107,10 @@ export default function LoginPage() {
       <div className="mt-6 text-center">
         <p className="text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-primary hover:underline font-medium">
+          <Link
+            href={`/register?next=${encodeURIComponent(next)}`}
+            className="text-primary hover:underline font-medium"
+          >
             Sign Up
           </Link>
         </p>
@@ -145,5 +153,23 @@ export default function LoginPage() {
         </div>
       </div>
     </Card>
+  );
+}
+
+/**
+ * useSearchParams opts this subtree into client-side rendering, so Next
+ * requires a Suspense boundary around it for the page to prerender.
+ */
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+      <div className="flex items-center justify-center py-16">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

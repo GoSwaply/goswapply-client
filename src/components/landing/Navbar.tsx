@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { MenuIcon, XIcon } from "@/components/ui/Icons";
 import AppStoreButtons from "@/components/ui/AppStoreButtons";
+import AuthNavActions from "@/components/landing/AuthNavActions";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -59,8 +60,10 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center gap-4">
             <AppStoreButtons />
+            {/* Without these, /login and /register were unreachable from the site. */}
+            <AuthNavActions />
           </div>
 
           <button
@@ -91,7 +94,11 @@ export default function Navbar() {
                   {link.name}
                 </a>
               ))}
-              <div className="pt-4 border-t border-border">
+              <div className="pt-4 border-t border-border space-y-4">
+                <AuthNavActions
+                  layout="col"
+                  onNavigate={() => setIsOpen(false)}
+                />
                 <AppStoreButtons layout="col" className="w-full" />
               </div>
             </div>

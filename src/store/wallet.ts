@@ -45,6 +45,8 @@ interface WalletState {
   fetchWallet: () => Promise<void>;
   fetchTransactions: (params?: Record<string, unknown>) => Promise<void>;
   fetchFundingAccounts: () => Promise<void>;
+  /** Claims a dedicated account. Only called on an explicit funding attempt. */
+  provisionFundingAccount: () => Promise<void>;
   clearErrors: () => void;
 }
 
@@ -106,6 +108,24 @@ export const useWalletStore = create<WalletState>((set) => ({
         fundingAccountsState: {
           status: "error",
           error: normalizeError(error, { resource: "funding accounts" }),
+        },
+      });
+    }
+  },
+
+  provisionFundingAccount: async () => {
+    set({ fundingAccountsState: LOADING });
+    try {
+      const response = await walletAPI.provisionFundingAccount();
+      set({
+        fundingAccounts: toList<FundingAccount>(response.data),
+        fundingAccountsState: LOADED,
+      });
+    } catch (error: unknown) {
+      set({
+        fundingAccountsState: {
+          status: "error",
+          error: normalizeError(error, { resource: "funding account" }),
         },
       });
     }
