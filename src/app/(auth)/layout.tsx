@@ -32,16 +32,12 @@ export default function AuthLayout({
 
           <div className="flex items-center gap-8">
             <div>
-              <div className="text-3xl font-bold text-gradient-gold">50K+</div>
-              <div className="text-sm text-muted-foreground">Active Users</div>
+              <div className="text-sm font-semibold text-foreground">Instant payments</div>
+              <div className="text-sm text-muted-foreground">Bills, airtime and data</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-gradient-gold">1M+</div>
-              <div className="text-sm text-muted-foreground">Transactions</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gradient-gold">99.9%</div>
-              <div className="text-sm text-muted-foreground">Uptime</div>
+              <div className="text-sm font-semibold text-foreground">Bank-grade security</div>
+              <div className="text-sm text-muted-foreground">Encrypted end to end</div>
             </div>
           </div>
         </div>
