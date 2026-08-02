@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# NEXT_PUBLIC_* is inlined into the client bundle and is not secret. This file
+# must be committed or production builds fall back to the localhost default.
+!.env.production
 
 # vercel
 .vercel
