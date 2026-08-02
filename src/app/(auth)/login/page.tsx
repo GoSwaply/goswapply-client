@@ -10,6 +10,7 @@ import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
 import { useAuthStore } from "@/store/auth";
 import { markReturningVisitor, postAuthDestination } from "@/lib/auth-intent";
+import { markVerificationSent } from "@/lib/pending-verification";
 
 function LoginForm() {
   const router = useRouter();
@@ -40,7 +41,17 @@ function LoginForm() {
       markReturningVisitor();
       toast.success("Welcome back!");
       router.push(next);
-    } catch {
+    } catch (err: unknown) {
+      // The API answers 401 with code EMAIL_NOT_VERIFIED for an unconfirmed
+      // address. That is not a failed sign-in — it is an unfinished signup, so
+      // send them where they can finish it instead of showing a dead error.
+      const body = (err as { response?: { data?: { code?: string } } })?.response
+        ?.data;
+      if (body?.code === "EMAIL_NOT_VERIFIED") {
+        markVerificationSent(formData.email);
+        router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+        return;
+      }
       toast.error(error || "Login failed. Please try again.");
     }
   };

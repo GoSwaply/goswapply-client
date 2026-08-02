@@ -884,7 +884,12 @@ export interface VerifyPinRequest {
 export interface OTPRequest {
   phone_number?: string;
   email?: string;
-  purpose: "registration" | "login" | "transaction" | "password_reset";
+  /**
+   * Optional: the API's ResendOtpDto accepts `email` only, and the global
+   * ValidationPipe runs with forbidNonWhitelisted, so sending this to
+   * /auth/resend-otp is rejected with a 400.
+   */
+  purpose?: "registration" | "login" | "transaction" | "password_reset";
 }
 
 export interface OTPVerifyRequest {
