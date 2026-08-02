@@ -21,6 +21,7 @@ import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
 import { useWalletStore } from "@/store/wallet";
 import ErrorState from "@/components/ui/ErrorState";
+import IdentityVerificationForm from "@/components/dashboard/IdentityVerificationForm";
 import EmptyState from "@/components/ui/EmptyState";
 import { normalizeError, toToastMessage, type AppError } from "@/lib/errors";
 import { walletAPI } from "@/lib/api";
@@ -40,13 +41,21 @@ const transactionTypes = [
 ];
 
 export default function WalletPage() {
-  const { wallet, fundingAccounts, fetchWallet, fetchFundingAccounts } =
-    useWalletStore();
+  const {
+    wallet,
+    fundingAccounts,
+    fundingAccountsState,
+    fetchWallet,
+    fetchFundingAccounts,
+    provisionFundingAccount,
+  } = useWalletStore();
   // Only provider-confirmed accounts are payable.
   const activeAccounts = fundingAccounts.filter(
     (a) => a.status === "ACTIVE" && a.accountNumber
   );
   const hasPendingAccount = fundingAccounts.some((a) => a.status === "PENDING");
+  const needsIdentity = fundingAccounts.some((a) => a.identificationRequired);
+  const hasAnyAccount = fundingAccounts.length > 0;
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [txError, setTxError] = useState<AppError | null>(null);
@@ -70,8 +79,19 @@ export default function WalletPage() {
    * we have already responded. Poll while anything is PENDING so the user is
    * not left staring at a spinner, and give up rather than polling forever.
    */
+  /**
+   * Opening this modal is the user's first funding attempt, and the only point
+   * at which we claim one of the business's limited dedicated accounts. Merely
+   * loading the dashboard must never provision.
+   */
   useEffect(() => {
-    if (!showFundModal || !hasPendingAccount) return;
+    if (!showFundModal || hasAnyAccount) return;
+    if (fundingAccountsState.status === "loading") return;
+    provisionFundingAccount();
+  }, [showFundModal, hasAnyAccount, fundingAccountsState.status, provisionFundingAccount]);
+
+  useEffect(() => {
+    if (!showFundModal || !hasPendingAccount || needsIdentity) return;
 
     let attempts = 0;
     const MAX_ATTEMPTS = 20; // ~60s at 3s intervals
@@ -86,7 +106,7 @@ export default function WalletPage() {
     }, 3000);
 
     return () => clearInterval(timer);
-  }, [showFundModal, hasPendingAccount, fetchFundingAccounts]);
+  }, [showFundModal, hasPendingAccount, needsIdentity, fetchFundingAccounts]);
 
   const fetchTransactions = async () => {
     setIsLoading(true);
@@ -406,6 +426,10 @@ export default function WalletPage() {
                 </div>
               ))}
             </div>
+          ) : needsIdentity ? (
+            /* The provider will not assign an account until the customer is
+               verified, so ask for the details rather than spinning. */
+            <IdentityVerificationForm onSubmitted={fetchFundingAccounts} />
           ) : hasPendingAccount && !provisioningTimedOut ? (
             /* Assignment is asynchronous — never show an unconfirmed number. */
             <div className="text-center py-8 space-y-2">

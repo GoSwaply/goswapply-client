@@ -121,11 +121,26 @@ export type VirtualAccountStatus = "PENDING" | "ACTIVE" | "FAILED";
  * `status === "ACTIVE"` — assignment is asynchronous and an unconfirmed
  * number must never be shown as payable.
  */
+export type IdentificationStatus =
+  | "NOT_REQUIRED"
+  | "PENDING"
+  | "VERIFIED"
+  | "FAILED";
+
 export interface FundingAccount {
   status: VirtualAccountStatus;
   bankName: string | null;
   accountNumber: string | null;
   accountName: string | null;
+  identificationStatus: IdentificationStatus;
+  /** True when the provider needs BVN details before assigning an account. */
+  identificationRequired: boolean;
+}
+
+export interface Bank {
+  code: string;
+  name: string;
+  slug?: string;
 }
 
 export interface PaystackDVA {

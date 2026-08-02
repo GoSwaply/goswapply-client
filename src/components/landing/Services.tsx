@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import {
   AirtimeIcon,
   DataIcon,
@@ -12,46 +13,55 @@ import {
   CryptoIcon,
 } from "@/components/ui/Icons";
 import Card from "@/components/ui/Card";
+import ServiceActionLink from "@/components/landing/ServiceActionLink";
 
 const services = [
   {
     icon: AirtimeIcon,
     title: "Airtime",
+    href: "/airtime",
     description: "Instant airtime top-up for all networks at discounted rates",
   },
   {
     icon: DataIcon,
     title: "Data Bundles",
+    href: "/data",
     description: "Buy data plans for MTN, Glo, Airtel, and 9mobile instantly",
   },
   {
     icon: ElectricityIcon,
     title: "Electricity",
+    href: "/electricity",
     description: "Pay PHCN bills for all distribution companies nationwide",
   },
   {
     icon: CableTVIcon,
     title: "Cable TV",
+    href: "/cable",
     description: "Subscribe to DStv, GOtv, and Startimes seamlessly",
   },
   {
     icon: BettingIcon,
     title: "Betting",
+    href: "/betting",
     description: "Fund your Bet9ja, BetKing, SportyBet accounts instantly",
   },
   {
     icon: FlightsIcon,
     title: "Flights",
+    href: "/flights",
     description: "Book domestic and international flights at great prices",
   },
   {
     icon: GiftCardIcon,
     title: "Gift Cards",
+    href: "/giftcards",
     description: "Sell Amazon, iTunes, Steam gift cards for instant cash",
   },
   {
     icon: CryptoIcon,
     title: "Crypto",
+    href: "/crypto",
     description: "Exchange BTC, ETH, USDT for Naira at the best rates",
   },
 ];
@@ -102,17 +112,29 @@ export default function Services() {
         >
           {services.map((service, index) => (
             <motion.div key={index} variants={itemVariants}>
-              <Card hover className="h-full group">
-                <div className="w-14 h-14 rounded-xl glass flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <service.icon size={36} />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">
-                  {service.title}
-                </h3>
-                <p className="text-muted-foreground text-sm">
-                  {service.description}
-                </p>
-              </Card>
+              {/* Each tile is the entry point into that service, routing
+                  through sign-in or sign-up as needed. */}
+              <ServiceActionLink
+                destination={service.href}
+                className="block h-full"
+                aria-label={`${service.title} — get started`}
+              >
+                <Card hover className="h-full group">
+                  <div className="w-14 h-14 rounded-xl glass flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <service.icon size={36} />
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground mb-2">
+                    {service.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm mb-4">
+                    {service.description}
+                  </p>
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                    Get started
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Card>
+              </ServiceActionLink>
             </motion.div>
           ))}
         </motion.div>

@@ -242,6 +242,14 @@ export const walletAPI = {
   getTransactions: (params?: TransactionFilter) => api.get("/transactions", { params }),
   getTransaction: (reference: string) => api.get(`/transactions/${reference}`),
   getFundingAccounts: () => api.get("/wallet/funding-accounts"),
+  /** Claims a dedicated account. Idempotent — the first funding attempt. */
+  provisionFundingAccount: () => api.post("/wallet/funding-accounts"),
+  /** BVN + bank details the provider needs before it will assign an account. */
+  verifyIdentity: (data: {
+    bvn: string;
+    bankCode: string;
+    accountNumber: string;
+  }) => api.post("/wallet/funding-accounts/verify-identity", data),
   withdraw: (data: WithdrawRequest) => api.post("/wallet/withdraw", data),
   transfer: (data: TransferRequest) => api.post("/wallet/transfer", data),
   fund: (data: { amount: number }) => api.post("/wallet/fund", data),

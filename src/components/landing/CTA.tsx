@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { SparklesIcon } from "@/components/ui/Icons";
 import AppStoreButtons from "@/components/ui/AppStoreButtons";
+import ServiceActionLink from "@/components/landing/ServiceActionLink";
 
 export default function CTA() {
   return (
@@ -37,7 +38,15 @@ export default function CTA() {
             transactions. Download the app and get started in minutes — no web account needed.
           </p>
 
-          <AppStoreButtons className="justify-center" />
+          <div className="flex flex-col items-center gap-5">
+            <ServiceActionLink
+              destination="/dashboard"
+              className="btn-gold text-primary-foreground px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-xl"
+            >
+              Create your free account
+            </ServiceActionLink>
+            <AppStoreButtons className="justify-center" />
+          </div>
 
           <p className="mt-8 text-sm text-muted-foreground">
             Free to download. No hidden fees. No minimum balance.

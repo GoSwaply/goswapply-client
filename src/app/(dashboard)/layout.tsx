@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Sidebar from "@/components/dashboard/Sidebar";
 import Header from "@/components/dashboard/Header";
@@ -14,20 +14,22 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { isAuthenticated, fetchProfile } = useAuthStore();
   const { fetchWallet, fetchFundingAccounts } = useWalletStore();
 
   useEffect(() => {
     const token = Cookies.get("access_token");
     if (!token) {
-      router.push("/login");
+      // Carry the destination so a deep link survives signing in.
+      router.push(`/login?next=${encodeURIComponent(pathname)}`);
       return;
     }
     fetchProfile().then(() => {
       fetchWallet();
       fetchFundingAccounts();
     });
-  }, [router, fetchProfile, fetchWallet, fetchFundingAccounts]);
+  }, [router, pathname, fetchProfile, fetchWallet, fetchFundingAccounts]);
 
   if (!isAuthenticated && !Cookies.get("access_token")) {
     return (

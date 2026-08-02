@@ -9,6 +9,7 @@ import {
   TrendingUpIcon,
 } from "@/components/ui/Icons";
 import AppStoreButtons from "@/components/ui/AppStoreButtons";
+import ServiceActionLink from "@/components/landing/ServiceActionLink";
 import ParticlesBackground from "./ParticlesBackground";
 import { publicAPI } from "@/lib/api";
 
@@ -93,8 +94,16 @@ export default function Hero() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="flex flex-col items-center gap-5 mb-16"
           >
+            {/* Primary path into the product. Previously the page offered only
+                app-store badges, so there was no way to start on the web. */}
+            <ServiceActionLink
+              destination="/dashboard"
+              className="btn-gold text-primary-foreground px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-xl"
+            >
+              Get started free
+            </ServiceActionLink>
             <p className="text-sm text-muted-foreground font-medium tracking-wide uppercase">
-              Available on mobile
+              Also available on mobile
             </p>
             <AppStoreButtons />
             <a
