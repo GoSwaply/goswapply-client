@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -25,7 +25,7 @@ import { useAuthStore } from "@/store/auth";
 import { useWalletStore } from "@/store/wallet";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, isCredit } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 const quickActions = [
@@ -56,6 +56,28 @@ export default function DashboardPage() {
   const { user } = useAuthStore();
   const { wallet, transactions, transactionsState, fetchTransactions } =
     useWalletStore();
+
+  // Real figures for the current calendar month. Only SUCCESS counts —
+  // pending and failed transactions have not moved money.
+  const monthly = useMemo(() => {
+    const now = new Date();
+    let income = 0;
+    let spent = 0;
+    for (const tx of transactions ?? []) {
+      if (tx.status !== "SUCCESS") continue;
+      const at = new Date(tx.createdAt);
+      if (
+        at.getMonth() !== now.getMonth() ||
+        at.getFullYear() !== now.getFullYear()
+      ) {
+        continue;
+      }
+      const amount = Number(tx.amount) || 0;
+      if (isCredit(tx)) income += amount;
+      else spent += amount;
+    }
+    return { income, spent, net: income - spent };
+  }, [transactions]);
 
   useEffect(() => {
     fetchTransactions({ limit: 5 });
@@ -151,15 +173,23 @@ export default function DashboardPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Income</span>
-                <span className="text-green-500 font-semibold">+{formatCurrency(125000)}</span>
+                <span className="text-green-500 font-semibold">
+                  {monthly.income > 0 ? `+${formatCurrency(monthly.income)}` : formatCurrency(0)}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Spent</span>
-                <span className="text-red-400 font-semibold">-{formatCurrency(45000)}</span>
+                <span className="text-red-400 font-semibold">
+                  {monthly.spent > 0 ? `-${formatCurrency(monthly.spent)}` : formatCurrency(0)}
+                </span>
               </div>
               <div className="flex items-center justify-between pt-4 border-t border-border">
                 <span className="text-foreground font-medium">Net</span>
-                <span className="text-primary font-bold">+{formatCurrency(80000)}</span>
+                <span className="text-primary font-bold">
+                  {monthly.net >= 0
+                    ? `+${formatCurrency(monthly.net)}`
+                    : `-${formatCurrency(Math.abs(monthly.net))}`}
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -221,10 +251,10 @@ export default function DashboardPage() {
                       <div
                         className={cn(
                           "w-10 h-10 rounded-full flex items-center justify-center",
-                          tx.transaction_type === "deposit" ? "bg-green-500/20" : "bg-red-500/20"
+                          isCredit(tx) ? "bg-green-500/20" : "bg-red-500/20"
                         )}
                       >
-                        {tx.transaction_type === "deposit" ? (
+                        {isCredit(tx) ? (
                           <ArrowDownLeft className="w-5 h-5 text-green-500" />
                         ) : (
                           <ArrowUpRight className="w-5 h-5 text-red-400" />
@@ -232,10 +262,10 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <p className="font-medium text-foreground capitalize">
-                          {tx.transaction_type.replace("_", " ")}
+                          {tx.type.replace(/_/g, " ")}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {new Date(tx.created_at).toLocaleDateString()}
+                          {new Date(tx.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -244,10 +274,10 @@ export default function DashboardPage() {
                         <p
                           className={cn(
                             "font-semibold",
-                            tx.transaction_type === "deposit" ? "text-green-500" : "text-foreground"
+                            isCredit(tx) ? "text-green-500" : "text-foreground"
                           )}
                         >
-                          {tx.transaction_type === "deposit" ? "+" : "-"}
+                          {isCredit(tx) ? "+" : "-"}
                           {formatCurrency(tx.amount)}
                         </p>
                         <p className="text-xs text-muted-foreground capitalize">

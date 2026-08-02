@@ -44,3 +44,14 @@ export function maskAccountNumber(account: string): string {
   if (account.length < 6) return account;
   return "****" + account.slice(-4);
 }
+
+
+/**
+ * Whether a transaction increases the wallet balance.
+ *
+ * The UI previously compared `transaction_type === "deposit"`, a field and
+ * value the API never returns, so every row rendered as a debit.
+ */
+export function isCredit(tx: { type: string }): boolean {
+  return ["FUNDING", "CRYPTO_PAYOUT", "GIFTCARD_PAYOUT"].includes(tx.type);
+}

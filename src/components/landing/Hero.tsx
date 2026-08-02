@@ -14,9 +14,12 @@ import ParticlesBackground from "./ParticlesBackground";
 import { publicAPI } from "@/lib/api";
 
 const stats = [
-  { label: "Active Users", value: "50K+" },
-  { label: "Transactions", value: "1M+" },
-  { label: "Success Rate", value: "99.9%" },
+  // Capability statements, not usage metrics. The previous values ("50K+
+  // users", "1M+ transactions", "99.9% success rate") were invented, which is
+  // a claim a financial service cannot make without the numbers to back it.
+  { label: "Payments", value: "Instant" },
+  { label: "Encryption", value: "Bank-grade" },
+  { label: "Support", value: "24/7" },
   { label: "Countries", value: "5+" },
 ];
 

@@ -11,6 +11,7 @@ import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
 import { useAuthStore } from "@/store/auth";
 import { markReturningVisitor, postAuthDestination } from "@/lib/auth-intent";
+import { markVerificationSent } from "@/lib/pending-verification";
 
 function RegisterForm() {
   const router = useRouter();
@@ -102,10 +103,11 @@ function RegisterForm() {
         toast.success("Account created successfully!");
         router.push(next);
       } else {
-        toast.success(
-          "Account created. Check your email for the verification code, then sign in."
-        );
-        router.push(`/login?next=${encodeURIComponent(next)}`);
+        // The address still needs confirming, so send them to the waiting room
+        // rather than a login form that will reject them.
+        markVerificationSent(formData.email);
+        toast.success("Account created. Check your inbox to verify.");
+        router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
       }
     } catch {
       toast.error(error || "Registration failed. Please try again.");

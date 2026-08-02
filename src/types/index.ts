@@ -71,48 +71,43 @@ export interface Wallet {
   updated_at: string;
 }
 
+/**
+ * Mirrors the API's Transaction entity. The previous shape was snake_case and
+ * carried fields the API never returns, so every read of it was undefined.
+ */
+export type TransactionType =
+  | "FUNDING"
+  | "TRANSFER"
+  | "WITHDRAWAL"
+  | "VAS_PAYMENT"
+  | "FLIGHT_BOOKING"
+  | "CRYPTO_PAYOUT"
+  | "GIFTCARD_PAYOUT";
+
+export type TransactionStatus = "PENDING" | "SUCCESS" | "FAILED";
+
 export interface Transaction {
   id: string;
-  wallet: string;
-  transaction_type: TransactionType;
+  userId: string;
   amount: number;
-  fee: number;
-  balance_before: number;
-  balance_after: number;
-  reference: string;
-  external_reference?: string;
-  description: string;
+  type: TransactionType;
   status: TransactionStatus;
-  metadata?: Record<string, unknown>;
-  provider?: string;
-  provider_response?: Record<string, unknown>;
-  created_at: string;
-  updated_at: string;
+  reference: string;
+  balanceBefore: number | null;
+  balanceAfter: number | null;
+  processorFee?: number | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export type TransactionType =
-  | "deposit"
-  | "withdrawal"
-  | "airtime"
-  | "data"
-  | "electricity"
-  | "tv"
-  | "betting"
-  | "flight"
-  | "giftcard"
-  | "crypto"
-  | "transfer"
-  | "refund"
-  | "bonus"
-  | "commission";
+/** Types that increase the wallet balance. Everything else decreases it. */
+export const CREDIT_TRANSACTION_TYPES: TransactionType[] = [
+  "FUNDING",
+  "CRYPTO_PAYOUT",
+  "GIFTCARD_PAYOUT",
+];
 
-export type TransactionStatus =
-  | "pending"
-  | "processing"
-  | "completed"
-  | "failed"
-  | "cancelled"
-  | "refunded";
+
 
 export type VirtualAccountStatus = "PENDING" | "ACTIVE" | "FAILED";
 
@@ -884,7 +879,12 @@ export interface VerifyPinRequest {
 export interface OTPRequest {
   phone_number?: string;
   email?: string;
-  purpose: "registration" | "login" | "transaction" | "password_reset";
+  /**
+   * Optional: the API's ResendOtpDto accepts `email` only, and the global
+   * ValidationPipe runs with forbidNonWhitelisted, so sending this to
+   * /auth/resend-otp is rejected with a 400.
+   */
+  purpose?: "registration" | "login" | "transaction" | "password_reset";
 }
 
 export interface OTPVerifyRequest {
