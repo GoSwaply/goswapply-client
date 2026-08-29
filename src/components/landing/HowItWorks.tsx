@@ -17,7 +17,7 @@ const steps = [
   {
     icon: CreditCardIcon,
     title: "Make Payments",
-    description: "Pay bills, buy airtime, or trade crypto with a few taps.",
+    description: "Pay bills, buy airtime and data, or book a flight in a few taps.",
   },
   {
     icon: CheckCircleIcon,

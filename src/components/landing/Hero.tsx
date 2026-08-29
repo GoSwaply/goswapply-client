@@ -20,7 +20,6 @@ const stats = [
   { label: "Payments", value: "Instant" },
   { label: "Encryption", value: "Bank-grade" },
   { label: "Support", value: "24/7" },
-  { label: "Countries", value: "5+" },
 ];
 
 const features = [
@@ -87,8 +86,8 @@ export default function Hero() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
           >
-            Pay bills, buy airtime & data, trade crypto, sell gift cards, and
-            book flights — all from one powerful platform with the best rates.
+            Pay bills, buy airtime and data, top up electricity, renew cable
+            TV and book flights — all from one secure Naira wallet.
           </motion.p>
 
           <motion.div
