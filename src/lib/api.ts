@@ -177,10 +177,20 @@ export const authAPI = {
   verifyPin: (data: VerifyPinRequest) => api.post("/auth/verify-pin", data),
   changePassword: (data: { oldPassword: string; newPassword: string }) =>
     api.post("/auth/change-password", data),
+  // Both paths were wrong: the API mounts these under /auth/password-reset/*,
+  // so every call 404'd. The reset also sent {token} where the code-based
+  // route expects {email, code}.
   requestPasswordReset: (data: { email: string }) =>
-    api.post("/auth/request-password-reset", data),
-  resetPassword: (data: { token: string; newPassword: string }) =>
-    api.post("/auth/reset-password", data),
+    api.post("/auth/password-reset/request", data),
+  /** Completes a reset from the emailed link. */
+  resetPasswordByToken: (data: { token: string; newPassword: string }) =>
+    api.post("/auth/password-reset/confirm-token", data),
+  /** Completes a reset from the emailed 6-digit code. */
+  resetPasswordByCode: (data: {
+    email: string;
+    code: string;
+    newPassword: string;
+  }) => api.post("/auth/password-reset/confirm", data),
 };
 
 // ==========================================

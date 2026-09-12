@@ -7,64 +7,55 @@ import {
   DataIcon,
   ElectricityIcon,
   CableTVIcon,
-  BettingIcon,
   FlightsIcon,
-  GiftCardIcon,
-  CryptoIcon,
 } from "@/components/ui/Icons";
 import Card from "@/components/ui/Card";
 import ServiceActionLink from "@/components/landing/ServiceActionLink";
 
+/**
+ * Public-facing services only.
+ *
+ * Betting top-ups, crypto and gift-card trading are deliberately absent. They
+ * remain available inside the signed-in app, but advertising them publicly has
+ * repeatedly blocked platform and payment-partner verification — gambling and
+ * virtual-asset trading are restricted categories for most reviewers.
+ *
+ * What is listed here maps to what our payment partner actually supports as
+ * bill categories: airtime, mobile data, utility bills, cable TV. Flights are
+ * collected through standard checkout rather than the bill-payment API.
+ */
 const services = [
   {
     icon: AirtimeIcon,
     title: "Airtime",
     href: "/airtime",
-    description: "Instant airtime top-up for all networks at discounted rates",
+    description: "Instant top-up for MTN, Glo, Airtel and 9mobile",
   },
   {
     icon: DataIcon,
     title: "Data Bundles",
     href: "/data",
-    description: "Buy data plans for MTN, Glo, Airtel, and 9mobile instantly",
+    description: "Data plans for every network, delivered in seconds",
   },
   {
     icon: ElectricityIcon,
     title: "Electricity",
     href: "/electricity",
-    description: "Pay PHCN bills for all distribution companies nationwide",
+    description: "Prepaid and postpaid tokens for every disco nationwide",
   },
   {
     icon: CableTVIcon,
     title: "Cable TV",
     href: "/cable",
-    description: "Subscribe to DStv, GOtv, and Startimes seamlessly",
-  },
-  {
-    icon: BettingIcon,
-    title: "Betting",
-    href: "/betting",
-    description: "Fund your Bet9ja, BetKing, SportyBet accounts instantly",
+    description: "Renew DStv, GOtv and StarTimes without leaving the app",
   },
   {
     icon: FlightsIcon,
     title: "Flights",
     href: "/flights",
-    description: "Book domestic and international flights at great prices",
+    description: "Book domestic and international flights from your wallet",
   },
-  {
-    icon: GiftCardIcon,
-    title: "Gift Cards",
-    href: "/giftcards",
-    description: "Sell Amazon, iTunes, Steam gift cards for instant cash",
-  },
-  {
-    icon: CryptoIcon,
-    title: "Crypto",
-    href: "/crypto",
-    description: "Exchange BTC, ETH, USDT for Naira at the best rates",
-  },
-];
+]
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -98,8 +89,8 @@ export default function Services() {
             <span className="text-foreground">in One Place</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            From utility bills to crypto trading, we&apos;ve got everything you need
-            to manage your finances effortlessly.
+            Airtime, data, electricity, cable TV and flights — paid from one wallet,
+            settled instantly, with every transaction receipted.
           </p>
         </motion.div>
 
@@ -108,7 +99,7 @@ export default function Services() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {services.map((service, index) => (
             <motion.div key={index} variants={itemVariants}>

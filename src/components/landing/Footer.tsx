@@ -18,9 +18,7 @@ const footerLinks = {
     { name: "Airtime & Data", href: "#services" },
     { name: "Electricity", href: "#services" },
     { name: "Cable TV", href: "#services" },
-    { name: "Betting", href: "#services" },
     { name: "Flights", href: "#services" },
-    { name: "Crypto & Gift Cards", href: "#services" },
   ],
   company: [
     { name: "About Us", href: "#" },
@@ -61,7 +59,7 @@ export default function Footer() {
             </Link>
             <p className="text-muted-foreground mb-6 max-w-sm">
               Nigeria&apos;s premier payment platform for airtime, data, bills,
-              crypto, gift cards, and more.
+              electricity, cable TV and flights.
             </p>
             <div className="space-y-3 mb-6">
               <div className="flex items-center gap-3 text-muted-foreground">
