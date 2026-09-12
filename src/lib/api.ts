@@ -270,12 +270,27 @@ export interface NotificationPreferences {
    * toggle that would silently never deliver.
    */
   whatsappAvailable: boolean;
+  telegramNotificationsEnabled: boolean;
+  /**
+   * Telegram can only deliver to a chat the user started with the bot, so
+   * until this is true there is nothing to toggle — only a link to follow.
+   */
+  telegramLinked: boolean;
 }
 
 export const preferencesAPI = {
   get: () => api.get("/users/me"),
   update: (prefs: Partial<NotificationPreferences>) =>
     api.patch("/users/preferences", prefs),
+};
+
+export const telegramAPI = {
+  /** Returns the t.me deep link that connects this account to the bot. */
+  link: () =>
+    api.post<{ deepLink: string | null; code: string; configured: boolean }>(
+      "/notifications/telegram/link",
+    ),
+  unlink: () => api.delete("/notifications/telegram/link"),
 };
 
 // ==========================================
@@ -407,12 +422,35 @@ export const giftcardsAPI = {
   getTransaction: (reference: string) => api.get(`/exchange/giftcards/transactions/${reference}`),
 };
 
+export interface AppNotification {
+  id: string;
+  /** Domain event, e.g. "walletCredited". Not shown to the user. */
+  event: string;
+  category: "SECURITY" | "TRANSACTIONAL";
+  title: string;
+  body: string;
+  metadata?: Record<string, unknown>;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface NotificationPage {
+  results: AppNotification[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
 export const notificationsAPI = {
-  getNotifications: (params?: { is_read?: boolean; page?: number; page_size?: number }) =>
-    api.get("/notifications", { params }),
+  getNotifications: (params?: {
+    isRead?: boolean;
+    page?: number;
+    pageSize?: number;
+  }) => api.get<NotificationPage>("/notifications", { params }),
   markAsRead: (id: string) => api.post(`/notifications/${id}/read`),
   markAllAsRead: () => api.post("/notifications/read-all"),
-  getUnreadCount: () => api.get("/notifications/unread-count"),
+  getUnreadCount: () => api.get<{ count: number }>("/notifications/unread-count"),
 };
 
 export default api;
