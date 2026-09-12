@@ -22,6 +22,7 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { useAuthStore } from "@/store/auth";
 import { authAPI } from "@/lib/api";
+import NotificationPreferencesPanel from "@/components/NotificationPreferences";
 
 export default function ProfilePage() {
   const { user, updateProfile, isLoading } = useAuthStore();
@@ -303,6 +304,8 @@ export default function ProfilePage() {
           </Card>
         </div>
       </div>
+
+      <NotificationPreferencesPanel />
 
       <Modal
         isOpen={showPinModal}

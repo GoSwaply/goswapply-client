@@ -257,6 +257,28 @@ export const accountAPI = {
 };
 
 // ==========================================
+// USER PREFERENCES
+// ==========================================
+export interface NotificationPreferences {
+  /** Master switch for optional alerts. */
+  notificationsEnabled: boolean;
+  emailNotificationsEnabled: boolean;
+  whatsappNotificationsEnabled: boolean;
+  /**
+   * False when no verified phone number is on file. WhatsApp cannot be
+   * enabled without one, so the client explains why rather than offering a
+   * toggle that would silently never deliver.
+   */
+  whatsappAvailable: boolean;
+}
+
+export const preferencesAPI = {
+  get: () => api.get("/users/me"),
+  update: (prefs: Partial<NotificationPreferences>) =>
+    api.patch("/users/preferences", prefs),
+};
+
+// ==========================================
 // KYC API
 // ==========================================
 export const kycAPI = {
