@@ -10,13 +10,19 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { giftcardsAPI } from "@/lib/api";
 import { formatCurrency, cn } from "@/lib/utils";
-import { GiftCardType, GiftCardRate } from "@/types";
+import { GiftCardType, GiftCardRate, GiftCardRateOption } from "@/types";
 
 export default function GiftCardsPage() {
   const [cardTypes, setCardTypes] = useState<GiftCardType[]>([]);
   const [selectedType, setSelectedType] = useState<GiftCardType | null>(null);
   const [rates, setRates] = useState<GiftCardRate[]>([]);
   const [selectedRate, setSelectedRate] = useState<GiftCardRate | null>(null);
+  /**
+   * The exact priced option — format and band. Chosen after a country, because
+   * a physical card with a receipt and a bare e-code are different prices.
+   */
+  const [selectedOption, setSelectedOption] =
+    useState<GiftCardRateOption | null>(null);
   const [amount, setAmount] = useState("");
   const [cardImage, setCardImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
@@ -38,17 +44,18 @@ export default function GiftCardsPage() {
   }, [selectedType]);
 
   useEffect(() => {
-    if (selectedRate && amount) {
-      const amountUsd = parseFloat(amount);
-      if (amountUsd >= selectedRate.min_amount && amountUsd <= selectedRate.max_amount) {
-        setCalculatedAmount(amountUsd * selectedRate.rate_per_dollar);
+    if (selectedOption && amount) {
+      const value = parseFloat(amount);
+      if (value >= selectedOption.minAmount && value <= selectedOption.maxAmount) {
+        // Shown for reassurance only — the desk prices from the option id.
+        setCalculatedAmount(value * selectedOption.ratePerUnit);
       } else {
         setCalculatedAmount(0);
       }
     } else {
       setCalculatedAmount(0);
     }
-  }, [selectedRate, amount]);
+  }, [selectedOption, amount]);
 
   const fetchCardTypes = async () => {
     try {
@@ -98,9 +105,10 @@ export default function GiftCardsPage() {
     }
 
     const amountUsd = parseFloat(amount);
-    if (amountUsd < selectedRate.min_amount || amountUsd > selectedRate.max_amount) {
+    if (!selectedOption) return;
+    if (amountUsd < selectedOption.minAmount || amountUsd > selectedOption.maxAmount) {
       toast.error(
-        `Amount must be between $${selectedRate.min_amount} and $${selectedRate.max_amount}`
+        `Enter a value between ${selectedOption.minAmount} and ${selectedOption.maxAmount} ${selectedRate?.currency ?? ""}`
       );
       return;
     }
@@ -109,7 +117,9 @@ export default function GiftCardsPage() {
     try {
       const formData = new FormData();
       formData.append("card_type", selectedType.code);
-      formData.append("country", selectedRate.country);
+      formData.append("country", selectedRate?.countryName ?? "");
+      // The desk prices from this, not from anything this page calculated.
+      formData.append("rateId", selectedOption.id);
       formData.append("amount_usd", amount);
       formData.append("card_image", cardImage);
 
@@ -198,30 +208,71 @@ export default function GiftCardsPage() {
               <div className="space-y-3">
                 {rates.map((rate) => (
                   <button
-                    key={rate.id}
-                    onClick={() => setSelectedRate(rate)}
+                    key={rate.countryCode}
+                    onClick={() => {
+                      setSelectedRate(rate);
+                      // The previous choice belongs to another country's pricing.
+                      setSelectedOption(null);
+                    }}
                     className={cn(
                       "w-full p-4 rounded-xl border-2 text-left transition-all",
-                      selectedRate?.id === rate.id
+                      selectedRate?.countryCode === rate.countryCode
                         ? "border-primary bg-primary/10"
                         : "border-border hover:border-primary/50"
                     )}
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-bold text-foreground">{rate.country}</p>
+                        <p className="font-bold text-foreground">{rate.countryName}</p>
                         <p className="text-sm text-muted-foreground">
-                          ${rate.min_amount} - ${rate.max_amount}
+                          {rate.options.length} option{rate.options.length === 1 ? "" : "s"} · {rate.currency}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="text-primary font-bold">
-                          {formatCurrency(rate.rate_per_dollar)}/USD
+                          up to {formatCurrency(Math.max(...rate.options.map((o) => o.ratePerUnit)))}
                         </p>
                       </div>
                     </div>
                   </button>
                 ))}
+
+                {selectedRate && (
+                  <div className="pt-2 space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      A physical card with its receipt is easier to verify, so
+                      it pays more than a bare e-code.
+                    </p>
+                    {selectedRate.options.map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => setSelectedOption(option)}
+                        className={cn(
+                          "w-full p-3 rounded-lg border-2 text-left transition-all",
+                          selectedOption?.id === option.id
+                            ? "border-primary bg-primary/10"
+                            : "border-border hover:border-primary/50"
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-medium text-foreground">
+                              {option.formatLabel}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {option.minAmount} – {option.maxAmount}{" "}
+                              {selectedRate.currency}
+                            </p>
+                          </div>
+                          <p className="text-primary font-bold shrink-0">
+                            {formatCurrency(option.ratePerUnit)} /{" "}
+                            {selectedRate.currency}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-center text-muted-foreground py-8">
@@ -239,7 +290,7 @@ export default function GiftCardsPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <Input
-              label={`Card Value (USD) - Min: $${selectedRate.min_amount}, Max: $${selectedRate.max_amount}`}
+              label={`Card value (${selectedRate.currency}) — ${selectedOption?.minAmount ?? ""} to ${selectedOption?.maxAmount ?? ""}`}
               type="number"
               placeholder="Enter card value"
               value={amount}
@@ -296,7 +347,7 @@ export default function GiftCardsPage() {
               <div className="glass-card rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Exchange Rate</span>
-                  <span className="text-foreground font-mono">{formatCurrency(selectedRate.rate_per_dollar)} / USD</span>
+                  <span className="text-foreground font-mono">{formatCurrency(selectedOption?.ratePerUnit ?? 0)} / {selectedRate.currency}</span>
                 </div>
                 <div className="border-t border-border pt-2 flex items-center justify-between">
                   <span className="font-medium text-foreground">Estimated Payout</span>
