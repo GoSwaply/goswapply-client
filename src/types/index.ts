@@ -457,16 +457,30 @@ export interface GiftCardType {
   created_at: string;
 }
 
-export interface GiftCardRate {
+/**
+ * How a card is presented — the largest single driver of its price. A physical
+ * card with its receipt is verifiable, so it trades well above a bare e-code.
+ */
+export type GiftCardFormat = "ECODE" | "PHYSICAL" | "PHYSICAL_WITH_RECEIPT";
+
+/** One priced option: a format within a denomination band. */
+export interface GiftCardRateOption {
   id: string;
-  card_type: string;
-  country: string;
+  format: GiftCardFormat;
+  formatLabel: string;
+  minAmount: number;
+  maxAmount: number;
+  /** Naira per unit of the card's own currency. */
+  ratePerUnit: number;
+}
+
+/** Rates for one country, with a row per format the desk buys. */
+export interface GiftCardRate {
+  countryCode: string;
+  countryName: string;
+  /** The card's currency — USD, GBP, EUR. Not the payout currency. */
   currency: string;
-  min_amount: number;
-  max_amount: number;
-  rate_per_dollar: number;
-  is_active: boolean;
-  created_at: string;
+  options: GiftCardRateOption[];
 }
 
 export interface GiftCardTransaction {
