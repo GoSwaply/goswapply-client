@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, Mail, MessageCircle, Loader2 } from "lucide-react";
+import { Bell, Mail, MessageCircle, Send, ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
-import { preferencesAPI, type NotificationPreferences } from "@/lib/api";
+import {
+  preferencesAPI,
+  telegramAPI,
+  type NotificationPreferences,
+} from "@/lib/api";
 
 /**
  * Where a user's alerts are delivered.
@@ -19,6 +23,7 @@ export default function NotificationPreferencesPanel() {
   const [prefs, setPrefs] = useState<NotificationPreferences | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const [linking, setLinking] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,6 +37,9 @@ export default function NotificationPreferencesPanel() {
           emailNotificationsEnabled: d.emailNotificationsEnabled ?? true,
           whatsappNotificationsEnabled: d.whatsappNotificationsEnabled ?? false,
           whatsappAvailable: d.whatsappAvailable ?? false,
+          telegramNotificationsEnabled:
+            d.telegramNotificationsEnabled ?? false,
+          telegramLinked: d.telegramLinked ?? false,
         });
       })
       .catch(() => {
@@ -58,6 +66,46 @@ export default function NotificationPreferencesPanel() {
       toast.error("That did not save. Please try again.");
     } finally {
       setSaving(null);
+    }
+  }
+
+  /**
+   * Opens the bot in a new tab. The chat is only linked once the user taps
+   * Start in Telegram, so this cannot report success — the panel reloads and
+   * lets the refreshed state say whether it worked.
+   */
+  async function connectTelegram() {
+    setLinking(true);
+    try {
+      const res = await telegramAPI.link();
+      const link = res.data?.deepLink;
+      if (!res.data?.configured || !link) {
+        toast.error("Telegram alerts are not available yet.");
+        return;
+      }
+      window.open(link, "_blank", "noopener,noreferrer");
+      toast.success("Tap Start in Telegram, then return here and refresh.");
+    } catch {
+      toast.error("Could not start the Telegram connection.");
+    } finally {
+      setLinking(false);
+    }
+  }
+
+  async function disconnectTelegram() {
+    setLinking(true);
+    try {
+      await telegramAPI.unlink();
+      setPrefs((p) =>
+        p
+          ? { ...p, telegramLinked: false, telegramNotificationsEnabled: false }
+          : p,
+      );
+      toast.success("Telegram disconnected.");
+    } catch {
+      toast.error("Could not disconnect Telegram.");
+    } finally {
+      setLinking(false);
     }
   }
 
@@ -131,6 +179,58 @@ export default function NotificationPreferencesPanel() {
           busy={saving === "whatsappNotificationsEnabled"}
           onChange={(v) => update("whatsappNotificationsEnabled", v)}
         />
+
+        {prefs.telegramLinked ? (
+          <>
+            <Toggle
+              icon={<Send className="w-5 h-5" aria-hidden="true" />}
+              title="Telegram"
+              description={
+                channelsDisabled
+                  ? "Turn on transaction alerts to choose this."
+                  : "Send those alerts to my Telegram."
+              }
+              checked={prefs.telegramNotificationsEnabled}
+              disabled={channelsDisabled}
+              busy={saving === "telegramNotificationsEnabled"}
+              onChange={(v) => update("telegramNotificationsEnabled", v)}
+            />
+            <button
+              type="button"
+              onClick={disconnectTelegram}
+              disabled={linking}
+              className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 disabled:opacity-60"
+            >
+              Disconnect Telegram
+            </button>
+          </>
+        ) : (
+          <div className="flex items-start gap-4 py-4">
+            <span className="text-muted-foreground mt-0.5 shrink-0">
+              <Send className="w-5 h-5" aria-hidden="true" />
+            </span>
+            <span className="flex-1 min-w-0">
+              <span className="block font-medium text-foreground">Telegram</span>
+              <span className="block text-sm text-muted-foreground text-pretty">
+                Get your alerts in Telegram. Connect once and they arrive there
+                free of charge.
+              </span>
+              <button
+                type="button"
+                onClick={connectTelegram}
+                disabled={linking}
+                className="mt-3 inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+              >
+                {linking ? (
+                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                )}
+                {linking ? "Opening Telegram…" : "Connect Telegram"}
+              </button>
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
