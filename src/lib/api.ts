@@ -314,14 +314,15 @@ export const walletAPI = {
   // so calling it through this client's baseURL 404s.
   getTransactions: (params?: TransactionFilter) => api.get("/transactions", { params }),
   getTransaction: (reference: string) => api.get(`/transactions/${reference}`),
+  getProvider: () => api.get("/wallet/provider"),
   getFundingAccounts: () => api.get("/wallet/funding-accounts"),
   /** Claims a dedicated account. Idempotent — the first funding attempt. */
   provisionFundingAccount: () => api.post("/wallet/funding-accounts"),
-  /** BVN + bank details the provider needs before it will assign an account. */
+  /** BVN (and optionally bank details) the provider needs before it will assign an account. */
   verifyIdentity: (data: {
     bvn: string;
-    bankCode: string;
-    accountNumber: string;
+    bankCode?: string;
+    accountNumber?: string;
   }) => api.post("/wallet/funding-accounts/verify-identity", data),
   withdraw: (data: WithdrawRequest) => api.post("/wallet/withdraw", data),
   transfer: (data: TransferRequest) => api.post("/wallet/transfer", data),
