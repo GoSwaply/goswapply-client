@@ -16,18 +16,20 @@ interface IdentityVerificationFormProps {
 }
 
 /**
- * Collects the BVN and bank account Paystack requires before it will assign a
- * dedicated account to a customer of a financial-services business.
+ * Collects the BVN the payment provider needs before issuing a dedicated
+ * account. Some providers (Paystack) also require a bank account for
+ * cross-reference; Flutterwave only needs the BVN. The form fetches the
+ * provider's capabilities and shows only the fields that are needed.
  *
  * Nothing entered here is stored by us — it goes to the provider and is
- * discarded. The copy says so, because asking for a BVN without explaining why
- * is how you lose the user at this step.
+ * discarded.
  */
 export default function IdentityVerificationForm({
   onSubmitted,
 }: IdentityVerificationFormProps) {
   const [banks, setBanks] = useState<Bank[]>([]);
   const [banksLoading, setBanksLoading] = useState(true);
+  const [needsBankDetails, setNeedsBankDetails] = useState(false);
   const [bvn, setBvn] = useState("");
   const [bankCode, setBankCode] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
@@ -35,6 +37,19 @@ export default function IdentityVerificationForm({
 
   useEffect(() => {
     let cancelled = false;
+
+    walletAPI
+      .getProvider()
+      .then((response) => {
+        if (cancelled) return;
+        const needs = response.data?.requiresBankDetails === true;
+        setNeedsBankDetails(needs);
+        if (!needs) setBanksLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) setBanksLoading(false);
+      });
+
     walletAPI
       .getBanks()
       .then((response) => {
@@ -50,6 +65,7 @@ export default function IdentityVerificationForm({
       .finally(() => {
         if (!cancelled) setBanksLoading(false);
       });
+
     return () => {
       cancelled = true;
     };
@@ -60,10 +76,12 @@ export default function IdentityVerificationForm({
     [banks]
   );
 
-  // Mirrors the API's DTO so the user is corrected before a round trip.
   const bvnValid = /^\d{11}$/.test(bvn);
   const accountValid = /^\d{10}$/.test(accountNumber);
-  const canSubmit = bvnValid && accountValid && Boolean(bankCode) && !submitting;
+  const canSubmit =
+    bvnValid &&
+    (!needsBankDetails || (accountValid && Boolean(bankCode))) &&
+    !submitting;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +89,10 @@ export default function IdentityVerificationForm({
 
     setSubmitting(true);
     try {
-      await walletAPI.verifyIdentity({ bvn, bankCode, accountNumber });
+      await walletAPI.verifyIdentity({
+        bvn,
+        ...(needsBankDetails ? { bankCode, accountNumber } : {}),
+      });
       toast.success("Details submitted. We are verifying them now.");
       onSubmitted();
     } catch (error: unknown) {
@@ -94,9 +115,9 @@ export default function IdentityVerificationForm({
             One-time verification
           </p>
           <p>
-            Our payment partner is required by law to verify your identity
-            before issuing a bank account in your name. These details are sent
-            straight to them and are never stored by Swaply.
+            Your BVN is required by law to verify your identity before issuing a
+            bank account in your name. It is sent straight to our payment
+            partner and is never stored by Swaply.
           </p>
         </div>
       </div>
@@ -111,28 +132,34 @@ export default function IdentityVerificationForm({
         error={bvn && !bvnValid ? "BVN must be exactly 11 digits" : undefined}
       />
 
-      <Select
-        label="Your bank"
-        options={bankOptions}
-        placeholder={banksLoading ? "Loading banks…" : "Select your bank"}
-        value={bankCode}
-        disabled={banksLoading || bankOptions.length === 0}
-        onChange={(e) => setBankCode(e.target.value)}
-      />
+      {needsBankDetails && (
+        <>
+          <Select
+            label="Your bank"
+            options={bankOptions}
+            placeholder={banksLoading ? "Loading banks…" : "Select your bank"}
+            value={bankCode}
+            disabled={banksLoading || bankOptions.length === 0}
+            onChange={(e) => setBankCode(e.target.value)}
+          />
 
-      <Input
-        label="Account number"
-        inputMode="numeric"
-        maxLength={10}
-        placeholder="0123456789"
-        value={accountNumber}
-        onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ""))}
-        error={
-          accountNumber && !accountValid
-            ? "Account number must be exactly 10 digits"
-            : undefined
-        }
-      />
+          <Input
+            label="Account number"
+            inputMode="numeric"
+            maxLength={10}
+            placeholder="0123456789"
+            value={accountNumber}
+            onChange={(e) =>
+              setAccountNumber(e.target.value.replace(/\D/g, ""))
+            }
+            error={
+              accountNumber && !accountValid
+                ? "Account number must be exactly 10 digits"
+                : undefined
+            }
+          />
+        </>
+      )}
 
       <Button
         type="submit"
