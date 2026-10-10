@@ -11,7 +11,7 @@ export default function AppStoreButtons({
   className = "",
   layout = "row",
   appStoreUrl = "#",
-  playStoreUrl = "#",
+  playStoreUrl = "https://play.google.com/store/apps/details?id=app.goswaply.com",
 }: AppStoreButtonsProps) {
   const flexDir = layout === "col" ? "flex-col" : "flex-row flex-wrap";
 
