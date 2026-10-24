@@ -18,7 +18,7 @@ const providers = [
   { value: "AEDC", label: "Abuja Electric (AEDC)" },
   { value: "KEDCO", label: "Kano Electric (KEDCO)" },
   { value: "PHED", label: "Port Harcourt Electric (PHED)" },
-  { value: "JED", label: "Jos Electric (JED)" },
+  { value: "JEDC", label: "Jos Electric (JEDC)" },
   { value: "IBEDC", label: "Ibadan Electric (IBEDC)" },
   { value: "KAEDCO", label: "Kaduna Electric (KAEDCO)" },
   { value: "EEDC", label: "Enugu Electric (EEDC)" },
