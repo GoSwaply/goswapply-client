@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import {
@@ -12,18 +13,6 @@ import {
 import Card from "@/components/ui/Card";
 import ServiceActionLink from "@/components/landing/ServiceActionLink";
 
-/**
- * Public-facing services only.
- *
- * Betting top-ups, crypto and gift-card trading are deliberately absent. They
- * remain available inside the signed-in app, but advertising them publicly has
- * repeatedly blocked platform and payment-partner verification — gambling and
- * virtual-asset trading are restricted categories for most reviewers.
- *
- * What is listed here maps to what our payment partner actually supports as
- * bill categories: airtime, mobile data, utility bills, cable TV. Flights are
- * collected through standard checkout rather than the bill-payment API.
- */
 const services = [
   {
     icon: AirtimeIcon,
@@ -55,7 +44,7 @@ const services = [
     href: "/flights",
     description: "Book domestic and international flights from your wallet",
   },
-]
+];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -94,41 +83,65 @@ export default function Services() {
           </p>
         </motion.div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {services.map((service, index) => (
-            <motion.div key={index} variants={itemVariants}>
-              {/* Each tile is the entry point into that service, routing
-                  through sign-in or sign-up as needed. */}
-              <ServiceActionLink
-                destination={service.href}
-                className="block h-full"
-                aria-label={`${service.title} — get started`}
-              >
-                <Card hover className="h-full group">
-                  <div className="w-14 h-14 rounded-xl glass flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <service.icon size={36} />
-                  </div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">
-                    {service.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    {service.description}
-                  </p>
-                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-                    Get started
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </Card>
-              </ServiceActionLink>
-            </motion.div>
-          ))}
-        </motion.div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Phone mockup */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="lg:col-span-4 flex justify-center"
+          >
+            <div className="relative">
+              <div className="absolute -inset-6 bg-primary/10 rounded-[3rem] blur-2xl" />
+              <div className="relative w-[240px] rounded-[2.5rem] border-[6px] border-gray-800 bg-gray-900 shadow-2xl overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-gray-900 rounded-b-xl z-10" />
+                <Image
+                  src="/screenshots/app-home.jpg"
+                  alt="Swaply app — pay bills, buy airtime, check gift card rates"
+                  width={240}
+                  height={520}
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Service cards */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-5"
+          >
+            {services.map((service, index) => (
+              <motion.div key={index} variants={itemVariants}>
+                <ServiceActionLink
+                  destination={service.href}
+                  className="block h-full"
+                  aria-label={`${service.title} — get started`}
+                >
+                  <Card hover className="h-full group">
+                    <div className="w-12 h-12 rounded-xl glass flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                      <service.icon size={28} />
+                    </div>
+                    <h3 className="text-lg font-bold text-foreground mb-1.5">
+                      {service.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm mb-3">
+                      {service.description}
+                    </p>
+                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                      Get started
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </Card>
+                </ServiceActionLink>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </div>
     </section>
   );

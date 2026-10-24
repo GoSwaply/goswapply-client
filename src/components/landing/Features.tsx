@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   ShieldIcon,
@@ -70,28 +71,54 @@ export default function Features() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="relative group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative glass-card rounded-2xl p-8 h-full">
-                <div className="w-14 h-14 rounded-xl glass flex items-center justify-center mb-6">
-                  <feature.icon size={32} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Feature cards */}
+          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+                className="relative group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative glass-card rounded-2xl p-6 h-full">
+                  <div className="w-12 h-12 rounded-xl glass flex items-center justify-center mb-4">
+                    <feature.icon size={28} />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-muted-foreground">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Phone mockup */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="lg:col-span-4 flex justify-center"
+          >
+            <div className="relative">
+              <div className="absolute -inset-6 bg-primary/10 rounded-[3rem] blur-2xl" />
+              <div className="relative w-[240px] rounded-[2.5rem] border-[6px] border-gray-800 bg-gray-900 shadow-2xl overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-gray-900 rounded-b-xl z-10" />
+                <Image
+                  src="/screenshots/app-giftcards.jpg"
+                  alt="Swaply app — sell gift cards and track trades"
+                  width={240}
+                  height={520}
+                  className="w-full h-auto"
+                />
               </div>
-            </motion.div>
-          ))}
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
