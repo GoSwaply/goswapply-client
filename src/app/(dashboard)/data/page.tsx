@@ -51,6 +51,11 @@ export default function DataPage() {
         data_amount: b.short_name ?? b.data_amount ?? "",
         validity: b.validity ?? "",
         price: Number(b.amount ?? b.price ?? 0),
+        provider_price: Number(b.amount ?? b.provider_price ?? 0),
+        provider: b.provider ?? "flutterwave",
+        is_active: b.is_active ?? true,
+        priority: b.priority ?? 0,
+        created_at: b.created_at ?? "",
       }));
       setPlans(mapped);
     } catch {
