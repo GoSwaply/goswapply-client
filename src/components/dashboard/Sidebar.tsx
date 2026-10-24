@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -51,9 +52,13 @@ export default function Sidebar() {
     <>
       <div className="flex items-center justify-between p-4 border-b border-border">
         <Link href="/dashboard" className="flex items-center space-x-2">
-          <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center flex-shrink-0">
-            <WalletIcon size={24} />
-          </div>
+          <Image
+            src="/logo.png"
+            alt="Swaply"
+            width={40}
+            height={40}
+            className="w-10 h-10 rounded-xl object-contain flex-shrink-0"
+          />
           {!isCollapsed && (
             <motion.span
               initial={{ opacity: 0 }}

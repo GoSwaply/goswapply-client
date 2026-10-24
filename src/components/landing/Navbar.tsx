@@ -38,7 +38,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <Image
-              src="https://res.cloudinary.com/deioo5lrm/image/upload/v1782721221/logo_wwjh5o.jpg"
+              src="/logo.png"
               alt="Swaply"
               width={120}
               height={40}

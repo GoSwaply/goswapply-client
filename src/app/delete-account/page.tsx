@@ -51,7 +51,7 @@ export default function DeleteAccountPage() {
       <nav className="border-b border-border px-6 py-4">
         <Link href="/" className="inline-flex">
           <Image
-            src="https://res.cloudinary.com/deioo5lrm/image/upload/v1782721221/logo_wwjh5o.jpg"
+            src="/logo.png"
             alt="Swaply"
             width={100}
             height={34}

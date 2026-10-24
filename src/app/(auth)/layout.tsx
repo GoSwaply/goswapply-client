@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Wallet } from "lucide-react";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -15,9 +15,13 @@ export default function AuthLayout({
 
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
-              <Wallet className="w-6 h-6 text-primary-foreground" />
-            </div>
+            <Image
+              src="/logo.png"
+              alt="Swaply"
+              width={44}
+              height={44}
+              className="h-11 w-11 rounded-xl object-contain"
+            />
             <span className="text-2xl font-bold text-gradient-gold">Swaply</span>
           </Link>
 
@@ -47,9 +51,13 @@ export default function AuthLayout({
         <div className="w-full max-w-md">
           <div className="lg:hidden mb-8 flex justify-center">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
-                <Wallet className="w-6 h-6 text-primary-foreground" />
-              </div>
+              <Image
+                src="/logo.png"
+                alt="Swaply"
+                width={44}
+                height={44}
+                className="h-11 w-11 rounded-xl object-contain"
+              />
               <span className="text-2xl font-bold text-gradient-gold">Swaply</span>
             </Link>
           </div>
