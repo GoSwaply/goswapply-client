@@ -45,7 +45,19 @@ export default function CablePage() {
     setSelectedPlan(null);
     try {
       const response = await utilitiesAPI.getTVPlans(provider);
-      setPlans(response.data);
+      const raw = response.data;
+      const mapped: TVPlan[] = (Array.isArray(raw) ? raw : []).map((b: any) => ({
+        id: b.item_code ?? b.id,
+        provider: provider,
+        name: b.short_name ?? b.name ?? "",
+        plan_code: b.item_code ?? b.plan_code ?? "",
+        price: Number(b.amount ?? b.price ?? 0),
+        provider_price: Number(b.amount ?? b.provider_price ?? 0),
+        validity: b.validity ?? "",
+        is_active: true,
+        created_at: "",
+      }));
+      setPlans(mapped);
     } catch {
       toast.error("Failed to load plans");
     } finally {
@@ -100,7 +112,8 @@ export default function CablePage() {
       const response = await utilitiesAPI.buyTV({
         provider_code: provider,
         smartcard_number: smartcardNumber,
-        plan_id: selectedPlan!.id,
+        plan_id: selectedPlan!.plan_code || selectedPlan!.id,
+        amount: selectedPlan!.price,
         pin,
       });
       setTransactionRef(response.data.reference);

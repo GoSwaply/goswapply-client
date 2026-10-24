@@ -64,15 +64,15 @@ export default function Footer() {
             <div className="space-y-3 mb-6">
               <div className="flex items-center gap-3 text-muted-foreground">
                 <EmailIcon size={20} />
-                <span>support@swaply.ng</span>
+                <span>support@gswaply.com</span>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
                 <PhoneIcon size={20} />
-                <span>+234 800 123 4567</span>
+                <span>+234 909 449 8704</span>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
                 <MapPinIcon size={20} />
-                <span>Lagos, Nigeria</span>
+                <span>3 Kenyata Street, Uwani, Enugu, Enugu State, Nigeria</span>
               </div>
             </div>
             <AppStoreButtons layout="col" />

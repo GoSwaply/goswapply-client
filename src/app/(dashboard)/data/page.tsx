@@ -42,7 +42,17 @@ export default function DataPage() {
     setSelectedPlan(null);
     try {
       const response = await vtuAPI.getDataPlans(selectedNetwork as NetworkProvider);
-      setPlans(response.data);
+      const raw = response.data;
+      const mapped: DataPlan[] = (Array.isArray(raw) ? raw : []).map((b: any) => ({
+        id: b.item_code ?? b.id,
+        network: selectedNetwork as NetworkProvider,
+        name: b.short_name ?? b.name ?? "",
+        plan_code: b.item_code ?? b.plan_code ?? "",
+        data_amount: b.short_name ?? b.data_amount ?? "",
+        validity: b.validity ?? "",
+        price: Number(b.amount ?? b.price ?? 0),
+      }));
+      setPlans(mapped);
     } catch {
       toast.error("Failed to load data plans");
     } finally {
@@ -78,6 +88,7 @@ export default function DataPage() {
         phone_number: phoneNumber,
         network: selectedNetwork as NetworkProvider,
         plan_id: selectedPlan!.id,
+        amount: selectedPlan!.price,
         pin,
       });
       setTransactionRef(response.data.reference);
