@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { isReturningVisitor, isSignedIn } from "@/lib/auth-intent";
@@ -13,24 +13,24 @@ interface AuthNavActionsProps {
   className?: string;
 }
 
+function getInitialAudience(): Audience {
+  if (isSignedIn()) return "signedIn";
+  if (isReturningVisitor()) return "returning";
+  return "guest";
+}
+
 /**
  * Sign-in / sign-up entry points, adapted to who is looking.
  *
- * Rendered as a guest on the server (no cookies there) and corrected on mount,
- * so server and client markup match during hydration.
+ * Client-only render resolves the audience synchronously from browser state so
+ * hydration remains stable without a state-setting effect.
  */
 export default function AuthNavActions({
   layout = "row",
   onNavigate,
   className,
 }: AuthNavActionsProps) {
-  const [audience, setAudience] = useState<Audience>("guest");
-
-  useEffect(() => {
-    if (isSignedIn()) setAudience("signedIn");
-    else if (isReturningVisitor()) setAudience("returning");
-    else setAudience("guest");
-  }, []);
+  const [audience] = useState<Audience>(getInitialAudience);
 
   const wrapper = cn(
     "flex items-center gap-3",

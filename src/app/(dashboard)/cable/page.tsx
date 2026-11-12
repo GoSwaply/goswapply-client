@@ -11,15 +11,11 @@ import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
 import { utilitiesAPI } from "@/lib/api";
 import { formatCurrency, cn } from "@/lib/utils";
-import { TVPlan } from "@/types";
-
-const providers = [
-  { value: "DSTV", label: "DStv" },
-  { value: "GOTV", label: "GOtv" },
-  { value: "STARTIMES", label: "Startimes" },
-];
+import { TVPlan, VasFieldConfig } from "@/types";
 
 export default function CablePage() {
+  const [providers, setProviders] = useState<{ value: string; label: string }[]>([]);
+  const [fieldConfig, setFieldConfig] = useState<VasFieldConfig>({});
   const [provider, setProvider] = useState("");
   const [smartcardNumber, setSmartcardNumber] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -35,6 +31,25 @@ export default function CablePage() {
   const [transactionRef, setTransactionRef] = useState("");
 
   useEffect(() => {
+    let active = true;
+    utilitiesAPI.getTVProviders().then(({ data }) => {
+      if (!active) return;
+      const config = data.fieldConfig?.tv;
+      const options = config?.providerOptions?.length
+        ? config.providerOptions.map(({ value, label }) => ({ value, label }))
+        : (data.tvProviders ?? []).map(({ code, name }) => ({ value: code, label: name }));
+      setFieldConfig(config ?? {});
+      setProviders(options);
+      setProvider((current) => current && options.some((option) => option.value === current)
+        ? current
+        : options[0]?.value ?? "");
+    }).catch(() => {
+      if (active) toast.error("Could not load active bill payment options");
+    });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
     if (provider) {
       fetchPlans();
     }
@@ -46,9 +61,20 @@ export default function CablePage() {
     try {
       const response = await utilitiesAPI.getTVPlans(provider);
       const raw = response.data;
-      const mapped: TVPlan[] = (Array.isArray(raw) ? raw : []).map((b: any) => ({
-        id: b.item_code ?? b.id,
-        provider: provider,
+      type RawTVPlan = {
+        item_code?: string;
+        id?: string;
+        short_name?: string;
+        name?: string;
+        plan_code?: string;
+        amount?: number | string;
+        price?: number | string;
+        provider_price?: number | string;
+        validity?: string;
+      };
+      const mapped: TVPlan[] = (Array.isArray(raw) ? raw : []).map((b: RawTVPlan) => ({
+        id: b.item_code ?? b.id ?? "",
+        provider,
         name: b.short_name ?? b.name ?? "",
         plan_code: b.item_code ?? b.plan_code ?? "",
         price: Number(b.amount ?? b.price ?? 0),
@@ -159,7 +185,7 @@ export default function CablePage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <Select
-            label="Select Provider"
+            label={fieldConfig.providerLabel || "Select Provider"}
             options={providers}
             value={provider}
             onChange={(e) => {
@@ -172,8 +198,8 @@ export default function CablePage() {
           <div className="flex gap-4">
             <div className="flex-1">
               <Input
-                label="Smartcard/IUC Number"
-                placeholder="Enter smartcard number"
+                label={fieldConfig.customerLabel || "Smartcard/IUC Number"}
+                placeholder={fieldConfig.placeholder || "Enter smartcard number"}
                 value={smartcardNumber}
                 onChange={(e) => {
                   setSmartcardNumber(e.target.value);

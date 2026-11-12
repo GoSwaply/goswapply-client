@@ -10,9 +10,9 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { vtuAPI } from "@/lib/api";
 import { formatCurrency, cn } from "@/lib/utils";
-import { DataPlan, NetworkProvider } from "@/types";
+import { DataPlan, NetworkProvider, VasFieldConfig } from "@/types";
 
-const networks: { code: NetworkProvider; name: string; color: string; logo: string }[] = [
+const defaultNetworks: { code: NetworkProvider; name: string; color: string; logo: string }[] = [
   { code: "mtn", name: "MTN Nigeria", color: "bg-yellow-500", logo: "M" },
   { code: "glo", name: "Glo", color: "bg-green-600", logo: "G" },
   { code: "airtel", name: "Airtel", color: "bg-red-600", logo: "A" },
@@ -20,6 +20,8 @@ const networks: { code: NetworkProvider; name: string; color: string; logo: stri
 ];
 
 export default function DataPage() {
+  const [networks, setNetworks] = useState(defaultNetworks);
+  const [fieldConfig, setFieldConfig] = useState<VasFieldConfig>({});
   const [selectedNetwork, setSelectedNetwork] = useState<NetworkProvider | "">("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [plans, setPlans] = useState<DataPlan[]>([]);
@@ -30,6 +32,36 @@ export default function DataPage() {
   const [showPinModal, setShowPinModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [transactionRef, setTransactionRef] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    vtuAPI.getNetworks().then(({ data }) => {
+      if (!active) return;
+      const config = data.fieldConfig?.data;
+      const options = config?.networkOptions ?? [];
+      const mapped = options.map((option) => {
+        const known = defaultNetworks.find((network) => network.code === option.value);
+        return {
+          code: option.value as NetworkProvider,
+          name: option.label,
+          color: known?.color ?? "bg-emerald-700",
+          logo: known?.logo ?? option.label.slice(0, 1).toUpperCase(),
+        };
+      });
+      setFieldConfig(config ?? {});
+      if (mapped.length > 0) {
+        setNetworks(mapped);
+        setSelectedNetwork((current) =>
+          current && mapped.some((network) => network.code === current)
+            ? current
+            : "",
+        );
+      }
+    }).catch(() => {
+      if (active) toast.error("Could not load active bill payment options");
+    });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     if (selectedNetwork) {
@@ -43,8 +75,24 @@ export default function DataPage() {
     try {
       const response = await vtuAPI.getDataPlans(selectedNetwork as NetworkProvider);
       const raw = response.data;
-      const mapped: DataPlan[] = (Array.isArray(raw) ? raw : []).map((b: any) => ({
-        id: b.item_code ?? b.id,
+      type RawDataPlan = {
+        item_code?: string;
+        id?: string;
+        short_name?: string;
+        name?: string;
+        plan_code?: string;
+        data_amount?: string;
+        validity?: string;
+        amount?: number | string;
+        price?: number | string;
+        provider_price?: number | string;
+        provider?: string;
+        is_active?: boolean;
+        priority?: number;
+        created_at?: string;
+      };
+      const mapped: DataPlan[] = (Array.isArray(raw) ? raw : []).map((b: RawDataPlan) => ({
+        id: b.item_code ?? b.id ?? "",
         network: selectedNetwork as NetworkProvider,
         name: b.short_name ?? b.name ?? "",
         plan_code: b.item_code ?? b.plan_code ?? "",
@@ -133,7 +181,7 @@ export default function DataPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Select Network</CardTitle>
+          <CardTitle>{fieldConfig.providerLabel || "Select Network"}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -208,9 +256,9 @@ export default function DataPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <Input
-            label="Phone Number"
+            label={fieldConfig.customerLabel || "Phone Number"}
             type="tel"
-            placeholder="08012345678"
+            placeholder={fieldConfig.placeholder || "08012345678"}
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 11))}
             leftIcon={<Phone className="w-5 h-5" />}

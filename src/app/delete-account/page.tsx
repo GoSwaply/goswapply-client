@@ -83,9 +83,9 @@ export default function DeleteAccountPage() {
               <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 mb-6 space-y-2 text-sm text-muted-foreground">
                 <p className="font-medium text-red-400 mb-1">Deleting your account will:</p>
                 <ul className="space-y-1 list-disc list-inside">
-                  <li>Permanently remove your profile and personal data</li>
-                  <li>Cancel any pending transactions or bookings</li>
-                  <li>Forfeit any wallet balance (ensure you withdraw first)</li>
+                  <li>Close your account and remove personal data we no longer need, subject to legal retention requirements</li>
+                  <li>Require you to resolve pending transactions and separately cancel any partner bookings</li>
+                  <li>Require you to withdraw any positive wallet balance first; the balance is not forfeited by account deletion</li>
                   <li>Revoke access to all Swaply services</li>
                 </ul>
               </div>

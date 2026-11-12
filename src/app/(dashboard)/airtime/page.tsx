@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Phone, ArrowRight, CheckCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -10,9 +10,9 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { vtuAPI } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
-import { NetworkProvider } from "@/types";
+import { NetworkProvider, VasFieldConfig } from "@/types";
 
-const networks: { code: NetworkProvider; name: string; color: string; logo: string }[] = [
+const defaultNetworks: { code: NetworkProvider; name: string; color: string; logo: string }[] = [
   { code: "mtn", name: "MTN Nigeria", color: "bg-yellow-500", logo: "M" },
   { code: "glo", name: "Glo", color: "bg-green-600", logo: "G" },
   { code: "airtel", name: "Airtel", color: "bg-red-600", logo: "A" },
@@ -22,6 +22,8 @@ const networks: { code: NetworkProvider; name: string; color: string; logo: stri
 const quickAmounts = [100, 200, 500, 1000, 2000, 5000];
 
 export default function AirtimePage() {
+  const [networks, setNetworks] = useState(defaultNetworks);
+  const [fieldConfig, setFieldConfig] = useState<VasFieldConfig>({});
   const [selectedNetwork, setSelectedNetwork] = useState<NetworkProvider | "">("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [amount, setAmount] = useState("");
@@ -30,6 +32,36 @@ export default function AirtimePage() {
   const [showPinModal, setShowPinModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [transactionRef, setTransactionRef] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    vtuAPI.getNetworks().then(({ data }) => {
+      if (!active) return;
+      const config = data.fieldConfig?.airtime;
+      const options = config?.networkOptions ?? [];
+      const mapped = options.map((option) => {
+        const known = defaultNetworks.find((network) => network.code === option.value);
+        return {
+          code: option.value as NetworkProvider,
+          name: option.label,
+          color: known?.color ?? "bg-emerald-700",
+          logo: known?.logo ?? option.label.slice(0, 1).toUpperCase(),
+        };
+      });
+      setFieldConfig(config ?? {});
+      if (mapped.length > 0) {
+        setNetworks(mapped);
+        setSelectedNetwork((current) =>
+          current && mapped.some((network) => network.code === current)
+            ? current
+            : "",
+        );
+      }
+    }).catch(() => {
+      if (active) toast.error("Could not load active bill payment options");
+    });
+    return () => { active = false; };
+  }, []);
 
   const handleSubmit = () => {
     if (!selectedNetwork) {
@@ -40,8 +72,14 @@ export default function AirtimePage() {
       toast.error("Please enter a valid phone number");
       return;
     }
-    if (!amount || parseInt(amount) < 50) {
-      toast.error("Minimum amount is N50");
+    const minimum = fieldConfig.amountField?.minimum ?? 50;
+    const maximum = fieldConfig.amountField?.maximum;
+    if (!amount || parseInt(amount) < minimum) {
+      toast.error(`Minimum amount is ${formatCurrency(minimum)}`);
+      return;
+    }
+    if (maximum != null && parseInt(amount) > maximum) {
+      toast.error(`Maximum amount is ${formatCurrency(maximum)}`);
       return;
     }
     setShowPinModal(true);
@@ -97,7 +135,7 @@ export default function AirtimePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Select Network</CardTitle>
+          <CardTitle>{fieldConfig.providerLabel || "Select Network"}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -131,9 +169,9 @@ export default function AirtimePage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <Input
-            label="Phone Number"
+            label={fieldConfig.customerLabel || "Phone Number"}
             type="tel"
-            placeholder="08012345678"
+            placeholder={fieldConfig.placeholder || "08012345678"}
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 11))}
             leftIcon={<Phone className="w-5 h-5" />}
@@ -160,7 +198,7 @@ export default function AirtimePage() {
             </div>
             <Input
               type="number"
-              placeholder="Or enter custom amount"
+              placeholder={fieldConfig.amountField?.label || "Or enter custom amount"}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               leftIcon={<span className="text-muted-foreground">NGN</span>}

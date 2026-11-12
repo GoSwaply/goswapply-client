@@ -17,13 +17,27 @@ import {
   GiftCardIcon,
   CryptoIcon,
   UserIcon,
-  SettingsIcon,
   LogoutIcon,
   ChevronLeftIcon,
   MenuIcon,
 } from "@/components/ui/Icons";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
+
+type SidebarUser = {
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+};
+
+type SidebarContentProps = {
+  isCollapsed: boolean;
+  pathname: string;
+  user: SidebarUser | null;
+  onToggleCollapse: () => void;
+  onCloseMobile: () => void;
+  onLogout: () => void;
+};
 
 const menuItems = [
   { icon: DashboardIcon, label: "Dashboard", href: "/dashboard" },
@@ -42,13 +56,15 @@ const bottomMenuItems = [
   { icon: UserIcon, label: "Profile", href: "/profile" },
 ];
 
-export default function Sidebar() {
-  const pathname = usePathname();
-  const { logout, user } = useAuthStore();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-
-  const SidebarContent = () => (
+function SidebarContent({
+  isCollapsed,
+  pathname,
+  user,
+  onToggleCollapse,
+  onCloseMobile,
+  onLogout,
+}: SidebarContentProps) {
+  return (
     <>
       <div className="flex items-center justify-between p-4 border-b border-border">
         <Link href="/dashboard" className="flex items-center space-x-2">
@@ -70,7 +86,7 @@ export default function Sidebar() {
           )}
         </Link>
         <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={onToggleCollapse}
           className="hidden lg:flex p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
         >
           <ChevronLeftIcon
@@ -87,7 +103,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setIsMobileOpen(false)}
+              onClick={onCloseMobile}
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
                 isActive
@@ -119,7 +135,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setIsMobileOpen(false)}
+              onClick={onCloseMobile}
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
                 isActive
@@ -133,7 +149,7 @@ export default function Sidebar() {
           );
         })}
         <button
-          onClick={() => logout()}
+          onClick={onLogout}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all duration-200"
         >
           <LogoutIcon size={20} className="flex-shrink-0" />
@@ -146,7 +162,8 @@ export default function Sidebar() {
           <div className="glass-card rounded-xl p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center text-primary-foreground font-bold">
-                {user.first_name?.[0]}{user.last_name?.[0]}
+                {user.first_name?.[0] ?? ""}
+                {user.last_name?.[0] ?? ""}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-foreground truncate">
@@ -162,6 +179,13 @@ export default function Sidebar() {
       )}
     </>
   );
+}
+
+export default function Sidebar() {
+  const pathname = usePathname();
+  const { logout, user } = useAuthStore();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
     <>
@@ -189,7 +213,14 @@ export default function Sidebar() {
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="lg:hidden fixed left-0 top-0 bottom-0 z-50 w-72 glass-card flex flex-col"
             >
-              <SidebarContent />
+              <SidebarContent
+                isCollapsed={isCollapsed}
+                pathname={pathname}
+                user={user as SidebarUser | null}
+                onToggleCollapse={() => setIsCollapsed((value) => !value)}
+                onCloseMobile={() => setIsMobileOpen(false)}
+                onLogout={logout}
+              />
             </motion.aside>
           </>
         )}
@@ -201,7 +232,14 @@ export default function Sidebar() {
           isCollapsed ? "w-20" : "w-72"
         )}
       >
-        <SidebarContent />
+        <SidebarContent
+          isCollapsed={isCollapsed}
+          pathname={pathname}
+          user={user as SidebarUser | null}
+          onToggleCollapse={() => setIsCollapsed((value) => !value)}
+          onCloseMobile={() => setIsMobileOpen(false)}
+          onLogout={logout}
+        />
       </aside>
     </>
   );

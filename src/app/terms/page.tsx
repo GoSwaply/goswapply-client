@@ -5,25 +5,30 @@ import { LegalList, LegalCallout } from "@/components/legal/LegalSection";
 export const metadata: Metadata = {
   title: "Terms of Service - Swaply",
   description:
-    "The terms governing your use of Swaply's wallet, bill payment, digital asset exchange, and flight booking services.",
+    "Terms governing access to Swaply accounts, wallet services, bill payments, exchange submissions, and partner services.",
 };
 
 const sections = [
-  { id: "acceptance", title: "1. Acceptance of Terms" },
-  { id: "eligibility", title: "2. Eligibility" },
-  { id: "accounts", title: "3. Your Account" },
-  { id: "wallet", title: "4. The Swaply Wallet" },
-  { id: "funding", title: "5. Funding & Dedicated Accounts" },
-  { id: "services", title: "6. Bills, Airtime & Data" },
-  { id: "exchange", title: "7. Digital Asset & Gift Card Exchange" },
-  { id: "fees", title: "8. Fees & Charges" },
-  { id: "kyc", title: "9. Identity Verification & Limits" },
-  { id: "prohibited", title: "10. Prohibited Use" },
-  { id: "disputes", title: "11. Errors, Reversals & Disputes" },
-  { id: "suspension", title: "12. Suspension & Termination" },
-  { id: "liability", title: "13. Limitation of Liability" },
-  { id: "changes", title: "14. Changes to these Terms" },
-  { id: "contact", title: "15. Contact Us" },
+  { id: "agreement", title: "1. Agreement and scope" },
+  { id: "eligibility", title: "2. Eligibility and location" },
+  { id: "account", title: "3. Account and security" },
+  { id: "wallet", title: "4. Wallet and payment services" },
+  { id: "funding", title: "5. Funding and withdrawals" },
+  { id: "bills", title: "6. Bills, airtime and data" },
+  { id: "exchange", title: "7. Crypto and gift-card submissions" },
+  { id: "flights", title: "8. Flight partner referrals" },
+  { id: "fees", title: "9. Prices, rates and fees" },
+  { id: "verification", title: "10. Verification and compliance" },
+  { id: "complaints", title: "11. Errors, cancellations and complaints" },
+  { id: "acceptable-use", title: "12. Acceptable use" },
+  { id: "suspension", title: "13. Restrictions and account closure" },
+  { id: "availability", title: "14. Service availability" },
+  { id: "third-parties", title: "15. Third-party services" },
+  { id: "liability", title: "16. Liability" },
+  { id: "intellectual-property", title: "17. Intellectual property" },
+  { id: "changes", title: "18. Changes to these Terms" },
+  { id: "law", title: "19. Governing law and consumer rights" },
+  { id: "contact", title: "20. Contact" },
 ];
 
 export default function TermsOfServicePage() {
@@ -31,218 +36,360 @@ export default function TermsOfServicePage() {
     <LegalLayout
       badge="Legal"
       title="Terms of Service"
-      description="These Terms govern your access to and use of Swaply's wallet, bill payment, digital asset exchange, and flight booking services. Please read them carefully before creating an account."
-      effectiveDate="January 1, 2026"
-      lastUpdated="August 1, 2026"
+      description="These Terms explain how Swaply works, what you agree to when you use it, and how transaction issues are handled. Please read them before opening an account or making a transaction."
+      effectiveDate="November 12, 2026"
+      lastUpdated="November 12, 2026"
       sections={sections}
     >
-      <LegalSection id="acceptance" title="1. Acceptance of Terms">
+      <LegalSection id="agreement" title="1. Agreement and scope">
         <p>
-          These Terms of Service (&ldquo;Terms&rdquo;) form a binding agreement between
-          you and <strong>Swaply Technologies Limited</strong> (&ldquo;Swaply&rdquo;,
-          &ldquo;we&rdquo;, &ldquo;us&rdquo;), governing your use of our website, mobile
-          application, and related services (collectively, the &ldquo;Service&rdquo;).
+          These Terms of Service (&ldquo;Terms&rdquo;) are an agreement between you and
+          <strong> Swaply Technologies Limited</strong> (&ldquo;Swaply&rdquo;,
+          &ldquo;we&rdquo;, &ldquo;us&rdquo;). They apply when you access our website,
+          mobile application, or related products (together, the &ldquo;Service&rdquo;).
+          They should be read with our <a href="/privacy">Privacy Policy</a> and any
+          product, price, or third-party terms shown before you confirm a transaction.
         </p>
         <p>
-          By creating an account, or by accessing or using the Service, you confirm that
-          you have read, understood, and agree to be bound by these Terms and by our{" "}
-          <a href="/privacy">Privacy Policy</a>. If you do not agree, do not use the
-          Service.
+          By selecting the acceptance control during registration or using the Service
+          after these Terms are presented, you agree to them. If you do not agree, do not
+          create an account or use the affected service. These Terms do not take away
+          rights that applicable law says cannot be waived.
         </p>
       </LegalSection>
 
       <LegalSection id="eligibility" title="2. Eligibility">
-        <p>To open and operate a Swaply account you must:</p>
+        <p>To open and use a Swaply account, you must:</p>
         <LegalList
           items={[
             "Be at least 18 years old.",
-            "Be legally capable of entering into a binding contract.",
+            "Have legal capacity to enter into a binding agreement.",
             "Provide accurate, current, and complete registration information.",
-            "Use the Service for your own account and not on behalf of another person without authorisation.",
+            "Use the account for yourself unless we have authorised you to act for another person.",
+            "Be located in a place where the relevant Service is lawfully available to you.",
           ]}
         />
         <p>
-          We may decline to open, or may close, any account where these conditions are
-          not met.
+          We may decline or restrict an account when eligibility, identity, security, or
+          legal requirements are not met. Some services may only be available to users
+          who pass additional checks.
         </p>
       </LegalSection>
 
-      <LegalSection id="accounts" title="3. Your Account">
+      <LegalSection id="account" title="3. Account and security">
         <p>
-          You are responsible for maintaining the confidentiality of your password,
-          transaction PIN, and any device used to access the Service. You must notify us
-          immediately if you suspect unauthorised access.
+          Keep your password, transaction PIN, one-time codes, and devices secure. Do not
+          share them with anyone, including a person claiming to be Swaply support. Tell
+          us promptly if you suspect that your account or credentials have been
+          compromised.
         </p>
         <LegalCallout title="Keep your PIN private" variant="warning">
-          Swaply staff will never ask you for your password, transaction PIN, one-time
-          code, or BVN. Anyone who does is attempting to defraud you.
+          Swaply support will not ask you to disclose your password, transaction PIN, or
+          one-time code. Submit identity information only through the Service or another
+          channel we identify as secure.
         </LegalCallout>
         <p>
-          Activity carried out using your credentials is treated as authorised by you,
-          except where you have told us they were compromised and we had a reasonable
-          opportunity to act.
+          You are responsible for activity you initiate or approve. We will assess
+          disputed or unauthorised transactions in accordance with applicable law and
+          the relevant payment partner rules; use of a credential alone does not remove
+          any rights you have by law.
         </p>
       </LegalSection>
 
-      <LegalSection id="wallet" title="4. The Swaply Wallet">
+      <LegalSection id="wallet" title="4. Wallet and payment services">
         <p>
-          Your Swaply wallet holds a Naira balance you can use across our services. The
-          wallet is a record of funds held with our licensed payment partners.
+          The wallet displays a Naira-denominated balance and transaction history for
+          eligible uses of the Service. It is an electronic record in the Swaply
+          platform, not a bank account opened by Swaply. Payment processing or funds
+          handling may be carried out by a payment provider or financial institution
+          identified in the relevant flow. The provider and applicable law determine
+          the treatment and any protection of funds; these Terms do not promise bank
+          deposit insurance.
         </p>
         <LegalList
           items={[
-            "Swaply is not a bank and does not pay interest on wallet balances.",
-            "Wallet funds are not a deposit and are not insured as a bank deposit.",
-            "We may place limits on balances or transactions in line with your verification level and applicable regulation.",
+            "Swaply is not a bank and wallet balances do not earn interest unless we expressly state otherwise.",
+            "We may apply transaction, balance, or service limits based on your verification level, risk checks, provider limits, and applicable law.",
+            "A transaction may remain pending while we or a provider confirm its status; a pending display is not confirmation of final settlement.",
           ]}
         />
       </LegalSection>
 
-      <LegalSection id="funding" title="5. Funding & Dedicated Accounts">
+      <LegalSection id="funding" title="5. Funding and withdrawals">
         <p>
-          You may fund your wallet by card or bank transfer through our payment partner,
-          or by transfer to a dedicated account number issued to you.
+          Funding methods may include card, bank transfer, or a dedicated account
+          provided through a payment partner. A transfer is credited after the relevant
+          provider confirms receipt and the transaction passes required checks. Delays
+          may occur because of bank, network, provider, or compliance review.
         </p>
         <p>
-          A dedicated account is issued and operated by a licensed partner bank on your
-          behalf. It is intended for funding your own wallet only. Funds transferred to
-          it are credited automatically once the partner confirms receipt, which is
-          normally within minutes but may take longer during bank downtime.
-        </p>
-        <LegalCallout title="Transfer only from an account in your own name" variant="warning">
-          Third-party transfers into your dedicated account may be delayed, returned, or
-          reported, in line with anti-money-laundering requirements.
-        </LegalCallout>
-      </LegalSection>
-
-      <LegalSection id="services" title="6. Bills, Airtime & Data">
-        <p>
-          Airtime, data, electricity, and television payments are fulfilled by third
-          party billers and aggregators. We pass your instruction to them and credit or
-          refund your wallet based on the outcome they report.
+          Use the account details shown in your own account and check the account name,
+          number, bank, and any transfer instructions before sending funds. A dedicated
+          account is for funding your Swaply wallet; it is not permission to receive
+          funds for another person. Transfers sent to incorrect details or from a source
+          requiring additional checks may be delayed, returned, or investigated.
         </p>
         <p>
-          You are responsible for the accuracy of the details you provide — phone number,
-          meter number, or smartcard number. A payment completed to details you supplied
-          may not be recoverable.
+          Where cash-out or withdrawal is available, requests are subject to available
+          balance, verification, destination-account checks, limits, disclosed fees,
+          and provider processing. A request may be held for review or rejected where
+          required by law or to protect you. Do not repeat a request while its status is
+          uncertain; check your transaction history or contact support first.
         </p>
       </LegalSection>
 
-      <LegalSection id="exchange" title="7. Digital Asset & Gift Card Exchange">
+      <LegalSection id="bills" title="6. Bills, airtime and data">
         <p>
-          Rates shown for digital assets and gift cards are indicative and are fixed only
-          at the point a submission is accepted. Submissions are reviewed before payout,
-          and we may decline any submission.
+          Airtime, data, electricity, television, and other bill payments are fulfilled
+          by external billers, aggregators, or networks. We submit the instruction you
+          confirm and display the status returned by the relevant provider. Provider
+          response times and availability are outside our direct control.
+        </p>
+        <p>
+          Check the recipient phone number, meter number, smartcard number, service,
+          amount, and any other details before confirming. A correctly completed
+          purchase sent to details you supplied may not be reversible. If your wallet is
+          debited but the provider reports failure or cannot confirm completion, we will
+          investigate and return or release the amount when the outcome is confirmed,
+          subject to applicable law.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="exchange" title="7. Crypto and gift-card submissions">
+        <p>
+          Crypto and gift-card services, where available, operate through quotes and
+          submissions that may require manual review. A displayed estimate is not a
+          guarantee of acceptance or payout. The rate, amount, fee, required evidence,
+          and any expiry that apply will be shown in the transaction flow; check them
+          before you submit.
         </p>
         <LegalList
           items={[
-            "Digital asset prices are volatile; the rate you receive is the rate quoted at submission.",
-            "Gift cards must be lawfully obtained and unused. We may request proof of purchase.",
-            "We may decline or reverse a transaction where a card or asset is found to be invalid, used, or fraudulently obtained.",
+            "Digital-asset prices can change quickly. Blockchain transfers may be irreversible and may incur network fees. Check the asset, network, address, amount, and quote before you proceed.",
+            "Only submit crypto or gift cards that you own or are authorised to sell. Gift cards must be genuine, unused, and lawfully obtained; we may request proof of ownership or purchase.",
+            "A submission may be held, repriced with your agreement, declined, or returned if evidence is missing, a card is invalid or redeemed, an asset is not received, or a fraud/compliance check requires it.",
+            "Do not send a gift-card code, private key, or recovery phrase except where the Service specifically and securely requests information needed for the submission. We will never ask for a wallet recovery phrase.",
           ]}
         />
-      </LegalSection>
-
-      <LegalSection id="fees" title="8. Fees & Charges">
         <p>
-          Applicable fees are shown before you confirm a transaction. Third parties —
-          including banks, card networks, and payment processors — may apply their own
-          charges, which are outside our control.
-        </p>
-        <p>
-          We may change our fees. Material changes will be notified in advance through
-          the app or by email.
+          Unless the transaction flow says otherwise, a submission is not complete and
+          no payout is due until the relevant asset or card has been received and the
+          submission is accepted under the displayed quote and review outcome.
         </p>
       </LegalSection>
 
-      <LegalSection id="kyc" title="9. Identity Verification & Limits">
+      <LegalSection id="flights" title="8. Flight partner referrals">
         <p>
-          Nigerian regulation requires us and our partners to verify customers. You agree
-          to provide identity information we reasonably request, which may include your
-          BVN, NIN, a government-issued document, or a photograph.
+          When a flight link is available, it takes you to an independent travel
+          partner. The partner, airline, or ticket issuer—not Swaply—searches inventory,
+          accepts the booking, issues the ticket, and sets the applicable fare rules.
+          You may leave the Swaply platform and will be subject to the partner’s terms
+          and privacy notice before completing a booking.
         </p>
         <p>
-          Verification details submitted for the purpose of issuing a dedicated account
-          are transmitted to our payment partner for that purpose. Transaction limits
-          depend on your verification level and may change to meet regulatory
-          requirements.
+          Review passenger names, dates, route, baggage, fare restrictions, and total
+          price before paying. For cancellations, changes, or refunds, contact the
+          booking partner or airline using the booking reference. Any cancellation
+          charge or refund restriction must be disclosed by the supplier and remains
+          subject to your rights under applicable consumer law.
         </p>
       </LegalSection>
 
-      <LegalSection id="prohibited" title="10. Prohibited Use">
+      <LegalSection id="fees" title="9. Prices, rates and fees">
+        <p>
+          We will show the applicable price, exchange rate, platform fee, and other
+          charges in the transaction flow before you confirm, where the information is
+          available to us. The confirmation screen and any provider-specific terms form
+          part of the transaction details. Do not proceed if the displayed amount or
+          recipient is not what you intend.
+        </p>
+        <p>
+          Banks, card networks, payment processors, airlines, or other suppliers may
+          charge fees under their own terms. We will disclose charges we impose or know
+          apply before confirmation. We may update future prices and fees; a change will
+          not retroactively alter a transaction already confirmed, except where required
+          to correct an error or permitted by law.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="verification" title="10. Verification and compliance">
+        <p>
+          We or a service provider may ask for identity, address, source-of-funds, or
+          transaction information to operate a service, protect accounts, meet legal
+          obligations, or investigate suspicious activity. This may include BVN, NIN,
+          identity documents, selfie or biometric checks, or proof of ownership. Provide
+          truthful information and tell us if it changes. We may be unable to provide a
+          feature until required checks are completed.
+        </p>
+        <p>
+          We and our providers may screen transactions, delay or reject a request, ask
+          for further information, restrict an account, or report activity when required
+          by law or reasonably necessary to prevent fraud or protect the Service. We
+          may be unable to explain some restrictions where law prohibits disclosure.
+          See the <a href="/privacy">Privacy Policy</a> for information about personal
+          data processing and your data rights.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="complaints" title="11. Errors, cancellations and complaints">
+        <p>
+          Check transaction details before you confirm. Some instructions—such as an
+          airtime top-up, utility payment, blockchain transfer, or a booking accepted by
+          a supplier—may be processed immediately and cannot be cancelled or recovered
+          once completed. This does not limit any cancellation, refund, or redress right
+          that applicable law gives you.
+        </p>
+        <p>
+          If a transaction is pending, do not repeat it until you have checked its status.
+          If your wallet was debited for a transaction that the provider confirms failed,
+          we will arrange a reversal or refund to the wallet as applicable. When a
+          provider cannot yet confirm the outcome, we may need to investigate before
+          releasing the funds. Refund timing can depend on the provider or payment rail;
+          we will not describe an unconfirmed transaction as failed solely because a
+          response is delayed.
+        </p>
+        <p>
+          For a flight or other partner service, cancellation, changes, and refunds are
+          governed by the supplier&apos;s disclosed fare or service rules and applicable
+          consumer law. We will not apply a blanket no-refund rule where the law requires
+          cancellation rights or a refund.
+        </p>
+        <p>
+          Contact <a href="mailto:support@gswaply.com">support@gswaply.com</a> as soon
+          as possible with your transaction reference, date, amount, and a description of
+          the issue. Do not include your password, PIN, or one-time code. We will review
+          the information and explain the outcome or any further steps. You may also
+          contact a competent regulator or use another remedy available under law; these
+          Terms do not require you to waive or exhaust a statutory right.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="acceptable-use" title="12. Acceptable use">
         <p>You must not use the Service to:</p>
         <LegalList
           items={[
-            "Break any law, or facilitate money laundering or terrorist financing.",
-            "Impersonate another person, or use an account that is not yours.",
-            "Handle proceeds of crime, or funds you are not entitled to.",
-            "Interfere with, probe, or attempt to gain unauthorised access to our systems.",
-            "Resell or commercially exploit the Service without our written consent.",
+            "Break a law, facilitate fraud, money laundering, terrorist financing, sanctions evasion, or another person’s unlawful activity.",
+            "Use a false identity, impersonate another person, or access an account or payment instrument without authority.",
+            "Submit stolen, counterfeit, already redeemed, or otherwise unlawfully obtained digital assets or gift cards.",
+            "Misuse the Service to send, receive, or conceal funds for someone else without our prior approval.",
+            "Interfere with the Service, probe or bypass security controls, introduce malicious code, or access data without permission.",
+            "Resell, scrape, or commercially exploit the Service except as we have agreed in writing.",
           ]}
         />
       </LegalSection>
 
-      <LegalSection id="disputes" title="11. Errors, Reversals & Disputes">
+      <LegalSection id="suspension" title="13. Restrictions and account closure">
         <p>
-          If a transaction fails after your wallet has been debited, we will refund your
-          wallet once the outcome is confirmed by the relevant provider. Some
-          confirmations depend on third parties and can take several business days.
+          We may pause a transaction or restrict, suspend, or close access where we
+          reasonably need to protect you or others, investigate suspected misuse, comply
+          with a provider requirement, or meet a legal or regulatory obligation. We will
+          give notice and reasons where lawful and appropriate. A restriction does not
+          remove any right to ask us to review a decision or to use a legal remedy.
         </p>
         <p>
-          Report any transaction you believe is incorrect or unauthorised as soon as
-          possible, and no later than 30 days after it appears in your history, so we can
-          investigate effectively.
-        </p>
-        <LegalCallout title="Do not retry an unconfirmed payment" variant="warning">
-          If we tell you we could not confirm whether a payment completed, check your
-          transaction history before trying again. Retrying may result in a second
-          charge.
-        </LegalCallout>
-      </LegalSection>
-
-      <LegalSection id="suspension" title="12. Suspension & Termination">
-        <p>
-          We may suspend or close an account where we reasonably suspect fraud, a breach
-          of these Terms, or where we are required to do so by law or by a regulator.
-          Where we are permitted to, we will tell you why.
-        </p>
-        <p>
-          You may close your account at any time. Any remaining balance will be returned
-          to a bank account in your name, subject to verification and to any legal hold.
+          You may request account closure through the Service. The current deletion flow
+          requires you to withdraw any positive wallet balance first; it does not
+          forfeit that balance. Pending transactions, disputes, or legal holds may need
+          to be resolved before closure. Account closure does not require us to erase
+          records that we must retain by law or for legitimate dispute, security, and
+          accounting purposes. See the <a href="/delete-account">account deletion page</a>
+          for the current process.
         </p>
       </LegalSection>
 
-      <LegalSection id="liability" title="13. Limitation of Liability">
+      <LegalSection id="availability" title="14. Service availability">
         <p>
-          The Service is provided on an &ldquo;as is&rdquo; basis. To the extent
-          permitted by law, we are not liable for indirect or consequential loss, or for
-          loss of profit, arising from your use of the Service.
-        </p>
-        <p>
-          Nothing in these Terms excludes liability for fraud, or for anything that
-          cannot lawfully be excluded.
-        </p>
-      </LegalSection>
-
-      <LegalSection id="changes" title="14. Changes to these Terms">
-        <p>
-          We may update these Terms from time to time. The &ldquo;last updated&rdquo;
-          date above reflects the most recent change. Where a change materially affects
-          your rights, we will give notice through the app or by email before it takes
-          effect. Continuing to use the Service after that point means you accept the
-          revised Terms.
+          We work to keep the Service available, but we do not promise uninterrupted or
+          error-free operation. Planned maintenance, connectivity problems, security
+          events, or failures at a bank, network, biller, verification vendor, or other
+          provider may make a feature temporarily unavailable or delay a transaction.
+          We may change or discontinue a feature where reasonably necessary, subject to
+          applicable law and any transaction already accepted.
         </p>
       </LegalSection>
 
-      <LegalSection id="contact" title="15. Contact Us">
+      <LegalSection id="third-parties" title="15. Third-party services">
         <p>
-          Questions about these Terms can be sent to{" "}
-          <a href="mailto:support@goswaply.com">support@goswaply.com</a>.
+          The Service relies on independent providers for payment processing, bank
+          transfers, identity checks, utilities, communications, and partner offers.
+          Their own terms, privacy notices, operational rules, and service availability
+          may apply. We remain responsible for obligations that applicable law places
+          on us; referring you to a provider does not waive your rights against Swaply
+          or that provider.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="liability" title="16. Liability">
+        <p>
+          Nothing in these Terms excludes or limits liability, a remedy, or a consumer
+          right that cannot lawfully be excluded or limited, including liability for
+          fraud or wilful misconduct where applicable.
+        </p>
+        <p>
+          Subject to that rule, we are not responsible for loss caused by your failure
+          to protect your credentials, incorrect details you entered and confirmed, or
+          an independent provider&apos;s act or outage to the extent that loss was outside
+          our reasonable control. We remain responsible for our own acts, omissions, and
+          duties under applicable law. To the extent permitted by law, we are not liable
+          for indirect or consequential loss that was not reasonably foreseeable when
+          you used the Service.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="intellectual-property" title="17. Intellectual property">
+        <p>
+          Swaply and its licensors own the Service and its content, branding, software,
+          and design, except for materials owned by third parties. We give you a limited,
+          personal, revocable, non-transferable right to use the Service for its intended
+          purpose while you comply with these Terms. You may not copy, modify, distribute,
+          reverse engineer, or commercially exploit the Service unless applicable law
+          permits it or we agree in writing.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="changes" title="18. Changes to these Terms">
+        <p>
+          We may update these Terms to reflect product, provider, legal, or security
+          changes. We will update the date above and, where a change materially affects
+          your rights, give reasonable notice through the Service or by email where
+          practicable. If you do not accept a material change, stop using the affected
+          feature and contact us about closing your account. Continued use after the
+          effective date means acceptance only to the extent permitted by law; it does
+          not waive rights that cannot be waived.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="law" title="19. Governing law and consumer rights">
+        <p>
+          These Terms and disputes about the Service are governed by the laws of the
+          Federal Republic of Nigeria, subject to mandatory consumer protections and any
+          applicable rules on jurisdiction. We encourage you to contact us first so we
+          can try to resolve a complaint. You may still refer a matter to the Federal
+          Competition and Consumer Protection Commission, the Central Bank of Nigeria
+          where it concerns a regulated financial provider, the Nigeria Data Protection
+          Commission for data-protection matters, or another competent authority where
+          the law permits.
+        </p>
+        <p>
+          Nothing in these Terms prevents you from exercising a right under the Federal
+          Competition and Consumer Protection Act 2018, the Nigeria Data Protection Act
+          2023, or any other applicable law. You may find further information on the
+          <a href="https://fccpc.gov.ng/consumers/consumer-rights-responsibilities/rights-responsibilities/" target="_blank" rel="noreferrer"> FCCPC consumer rights page</a> and the
+          <a href="https://ndpc.gov.ng/" target="_blank" rel="noreferrer"> Nigeria Data Protection Commission website</a>.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="contact" title="20. Contact">
+        <p>
+          For account, transaction, or Terms questions, contact{" "}
+          <a href="mailto:support@gswaply.com">support@gswaply.com</a> or call +234
+          909 449 8704. Please include your transaction reference where relevant, and
+          do not send your password, transaction PIN, or one-time code.
         </p>
         <p>
           <strong>Swaply Technologies Limited</strong>
           <br />
-          Lagos, Nigeria
+          3 Kenyata Street, Uwani, Enugu, Enugu State, Nigeria.
         </p>
       </LegalSection>
     </LegalLayout>

@@ -222,6 +222,45 @@ export interface WithdrawalRequest {
 
 export type NetworkProvider = "mtn" | "glo" | "airtel" | "9mobile";
 
+export interface VasFieldOption {
+  label: string;
+  value: string;
+  code?: string;
+}
+
+export interface VasFieldConfig {
+  customerField?: string;
+  customerLabel?: string;
+  placeholder?: string;
+  validation?: string;
+  providerField?: string;
+  providerLabel?: string;
+  providerOptions?: VasFieldOption[];
+  networkOptions?: VasFieldOption[];
+  meterTypeOptions?: VasFieldOption[];
+  planCodeField?: string;
+  amountField?: { label?: string; minimum?: number; maximum?: number };
+}
+
+export interface VasServiceMeta {
+  provider: "flutterwave" | "interswitch";
+  providerLabel: string;
+  electricityDiscos: Array<{
+    code: string;
+    name: string;
+    item_code: string;
+    biller_code: string;
+  }>;
+  meterTypes: Array<{ code: string; name: string }>;
+  tvProviders: Array<{ code: string; name: string }>;
+  fieldConfig: {
+    airtime: VasFieldConfig;
+    data: VasFieldConfig;
+    electricity: VasFieldConfig;
+    tv: VasFieldConfig;
+  };
+}
+
 export interface Network {
   name: string;
   code: NetworkProvider;

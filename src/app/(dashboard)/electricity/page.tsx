@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Zap, ArrowRight, CheckCircle, Copy, Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -11,26 +11,12 @@ import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
 import { utilitiesAPI } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
-
-const providers = [
-  { value: "IKEDC", label: "Ikeja Electric (IKEDC)" },
-  { value: "EKEDC", label: "Eko Electric (EKEDC)" },
-  { value: "AEDC", label: "Abuja Electric (AEDC)" },
-  { value: "KEDCO", label: "Kano Electric (KEDCO)" },
-  { value: "PHED", label: "Port Harcourt Electric (PHED)" },
-  { value: "JEDC", label: "Jos Electric (JEDC)" },
-  { value: "IBEDC", label: "Ibadan Electric (IBEDC)" },
-  { value: "KAEDCO", label: "Kaduna Electric (KAEDCO)" },
-  { value: "EEDC", label: "Enugu Electric (EEDC)" },
-  { value: "BEDC", label: "Benin Electric (BEDC)" },
-];
-
-const meterTypes = [
-  { value: "prepaid", label: "Prepaid" },
-  { value: "postpaid", label: "Postpaid" },
-];
+import type { VasFieldConfig } from "@/types";
 
 export default function ElectricityPage() {
+  const [providers, setProviders] = useState<{ value: string; label: string }[]>([]);
+  const [meterTypes, setMeterTypes] = useState<{ value: string; label: string }[]>([]);
+  const [fieldConfig, setFieldConfig] = useState<VasFieldConfig>({});
   const [provider, setProvider] = useState("");
   const [meterType, setMeterType] = useState<"prepaid" | "postpaid">("prepaid");
   const [meterNumber, setMeterNumber] = useState("");
@@ -44,6 +30,31 @@ export default function ElectricityPage() {
   const [showPinModal, setShowPinModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [transactionRef, setTransactionRef] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    utilitiesAPI.getElectricityProviders().then(({ data }) => {
+      if (!active) return;
+      const config = data.fieldConfig?.electricity;
+      const providerOptions = config?.providerOptions?.length
+        ? config.providerOptions.map(({ value, label }) => ({ value, label }))
+        : (data.electricityDiscos ?? []).map(({ code, name }) => ({ value: code, label: name }));
+      const meterOptions = config?.meterTypeOptions?.map(({ value, label }) => ({ value: value.toLowerCase(), label }))
+        ?? (data.meterTypes ?? []).map(({ code, name }) => ({ value: code.toLowerCase(), label: name }));
+      setFieldConfig(config ?? {});
+      setProviders(providerOptions);
+      setMeterTypes(meterOptions);
+      setProvider((current) => current && providerOptions.some((item) => item.value === current)
+        ? current
+        : providerOptions[0]?.value ?? "");
+      setMeterType((current) => meterOptions.some((item) => item.value === current)
+        ? current
+        : (meterOptions[0]?.value as "prepaid" | "postpaid") ?? "prepaid");
+    }).catch(() => {
+      if (active) toast.error("Could not load active bill payment options");
+    });
+    return () => { active = false; };
+  }, []);
 
   const handleVerify = async () => {
     if (!provider || !meterNumber) {
@@ -75,8 +86,14 @@ export default function ElectricityPage() {
       toast.error("Please verify meter number first");
       return;
     }
-    if (!amount || parseInt(amount) < 500) {
-      toast.error("Minimum amount is N500");
+    const minimum = fieldConfig.amountField?.minimum ?? 500;
+    const maximum = fieldConfig.amountField?.maximum;
+    if (!amount || parseInt(amount) < minimum) {
+      toast.error(`Minimum amount is ${formatCurrency(minimum)}`);
+      return;
+    }
+    if (maximum != null && parseInt(amount) > maximum) {
+      toast.error(`Maximum amount is ${formatCurrency(maximum)}`);
       return;
     }
     setShowPinModal(true);
@@ -147,7 +164,7 @@ export default function ElectricityPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <Select
-            label="Distribution Company"
+            label={fieldConfig.providerLabel || "Distribution Company"}
             options={providers}
             value={provider}
             onChange={(e) => {
@@ -170,8 +187,8 @@ export default function ElectricityPage() {
           <div className="flex gap-4">
             <div className="flex-1">
               <Input
-                label="Meter Number"
-                placeholder="Enter meter number"
+                label={fieldConfig.customerLabel || "Meter Number"}
+                placeholder={fieldConfig.placeholder || "Enter meter number"}
                 value={meterNumber}
                 onChange={(e) => {
                   setMeterNumber(e.target.value);
@@ -212,7 +229,7 @@ export default function ElectricityPage() {
           <Input
             label="Amount"
             type="number"
-            placeholder="Enter amount (min. N500)"
+            placeholder={fieldConfig.amountField?.label || `Enter amount (min. ${formatCurrency(fieldConfig.amountField?.minimum ?? 500)})`}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             leftIcon={<span className="text-muted-foreground">NGN</span>}

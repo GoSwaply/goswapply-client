@@ -19,6 +19,7 @@ import type {
   FlightBookingRequest,
   TransactionFilter,
   NetworkProvider,
+  VasServiceMeta,
 } from "@/types";
 
 const PRODUCTION_API_URL = "https://api.goswaply.com/api/v1";
@@ -49,6 +50,35 @@ function resolveApiBaseUrl(): string {
 
 const API_BASE_URL = resolveApiBaseUrl();
 const API_ROOT_URL = API_BASE_URL.replace(/\/api\/v1$/, "");
+
+type LegacyRegisterPayload = Partial<RegisterRequest> & {
+  firstName?: string;
+  lastName?: string;
+  first_name?: string;
+  last_name?: string;
+  phoneNumber?: string;
+  phone_number?: string;
+};
+
+type LegacyServicePayload = {
+  phoneNumber?: string;
+  phone_number?: string;
+  network?: NetworkProvider;
+  amount?: number | string;
+  pin?: string;
+  planCode?: string;
+  plan_id?: string;
+  meterNumber?: string;
+  meter_number?: string;
+  meterType?: "prepaid" | "postpaid";
+  meter_type?: "prepaid" | "postpaid";
+  disco?: string;
+  provider_code?: string;
+  providerId?: string;
+  smartcardNumber?: string;
+  smartcard_number?: string;
+  provider?: string;
+};
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -158,7 +188,7 @@ export const publicAPI = {
 // AUTHENTICATION API
 // ==========================================
 export const authAPI = {
-  register: (data: any) =>
+  register: (data: LegacyRegisterPayload) =>
     api.post("/auth/register", {
       firstName: data.firstName || data.first_name,
       lastName: data.lastName || data.last_name,
@@ -333,57 +363,61 @@ export const walletAPI = {
 };
 
 export const vtuAPI = {
-  getNetworks: () => api.get("/services/meta"),
-  getNetworkDiscounts: () => api.get("/services/meta"),
-  buyAirtime: (data: any) =>
+  getNetworks: () => api.get<VasServiceMeta>("/services/meta"),
+  getNetworkDiscounts: () => api.get<VasServiceMeta>("/services/meta"),
+  buyAirtime: (data: LegacyServicePayload & Pick<BuyAirtimeRequest, "phone_number" | "network" | "amount">) =>
     api.post("/services/airtime", {
       phoneNumber: data.phoneNumber || data.phone_number,
       network: data.network,
       amount: Number(data.amount),
+      transactionPin: data.pin,
     }),
   getAirtimeHistory: (params?: TransactionFilter) => api.get("/wallet/transactions", { params }),
   getDataPlans: (network?: NetworkProvider) =>
     api.get(`/services/data-bundles/${network || "mtn"}`),
-  buyData: (data: any) =>
+  buyData: (data: LegacyServicePayload & Pick<BuyDataRequest, "phone_number" | "network" | "plan_id">) =>
     api.post("/services/data", {
       phoneNumber: data.phoneNumber || data.phone_number,
       planCode: data.planCode || data.plan_id || "1GB",
       network: data.network,
       amount: Number(data.amount || 500),
+      transactionPin: data.pin,
     }),
   getDataHistory: (params?: TransactionFilter) => api.get("/wallet/transactions", { params }),
 };
 
 export const utilitiesAPI = {
-  getElectricityProviders: () => api.get("/services/meta"),
-  verifyMeter: (data: any) =>
+  getElectricityProviders: () => api.get<VasServiceMeta>("/services/meta"),
+  verifyMeter: (data: LegacyServicePayload) =>
     api.post("/services/electricity/validate", {
       meterNumber: data.meterNumber || data.meter_number,
       disco: data.disco || data.provider_code || "eedc",
       meterType: data.meterType || data.meter_type || "prepaid",
     }),
-  buyElectricity: (data: any) =>
+  buyElectricity: (data: LegacyServicePayload & Pick<BuyElectricityRequest, "provider_code" | "meter_number" | "meter_type" | "amount">) =>
     api.post("/services/electricity", {
       meterNumber: data.meterNumber || data.meter_number,
       disco: data.disco || data.provider_code || "eedc",
       meterType: data.meterType || data.meter_type || "prepaid",
       amount: Number(data.amount),
+      transactionPin: data.pin,
     }),
   getElectricityHistory: (params?: TransactionFilter) => api.get("/wallet/transactions", { params }),
-  getTVProviders: () => api.get("/services/meta"),
+  getTVProviders: () => api.get<VasServiceMeta>("/services/meta"),
   getTVPlans: (provider_code: string) =>
     api.get(`/services/tv-plans/${provider_code || "dstv"}`),
-  verifySmartcard: (data: any) =>
+  verifySmartcard: (data: LegacyServicePayload) =>
     api.post("/services/tv/validate", {
       providerId: data.providerId || data.provider_code || "dstv",
       smartcardNumber: data.smartcardNumber || data.smartcard_number,
     }),
-  buyTV: (data: any) =>
+  buyTV: (data: LegacyServicePayload & { provider_code?: string; smartcard_number?: string; plan_id?: string; amount?: number | string; pin?: string }) =>
     api.post("/services/tv", {
       smartcardNumber: data.smartcardNumber || data.smartcard_number,
       planCode: data.planCode || data.plan_id || "dstv-padi",
       provider: data.provider || data.provider_code || "dstv",
       amount: Number(data.amount || 3600),
+      transactionPin: data.pin,
     }),
   getTVHistory: (params?: TransactionFilter) => api.get("/wallet/transactions", { params }),
 };

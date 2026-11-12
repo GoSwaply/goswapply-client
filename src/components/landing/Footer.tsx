@@ -27,7 +27,7 @@ const footerLinks = {
     { name: "Contact", href: "#" },
   ],
   legal: [
-    { name: "Terms of Service", href: "#" },
+    { name: "Terms of Service", href: "/terms" },
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Cookie Policy", href: "#" },
     { name: "AML Policy", href: "#" },
