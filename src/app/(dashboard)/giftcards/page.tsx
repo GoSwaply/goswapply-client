@@ -11,6 +11,7 @@ import Modal from "@/components/ui/Modal";
 import { giftcardsAPI } from "@/lib/api";
 import { formatCurrency, cn } from "@/lib/utils";
 import { GiftCardType, GiftCardRate, GiftCardRateOption } from "@/types";
+import GiftCardCommercePanel from "@/components/giftcards/GiftCardCommercePanel";
 
 export default function GiftCardsPage() {
   const [cardTypes, setCardTypes] = useState<GiftCardType[]>([]);
@@ -32,6 +33,7 @@ export default function GiftCardsPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [transactionRef, setTransactionRef] = useState("");
   const [calculatedAmount, setCalculatedAmount] = useState(0);
+  const [mode, setMode] = useState<"sell" | "buy" | "withdraw">("sell");
 
   useEffect(() => {
     fetchCardTypes();
@@ -152,13 +154,33 @@ export default function GiftCardsPage() {
     >
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-          Sell Gift Cards
+          Gift Cards
         </h1>
         <p className="text-muted-foreground">
-          Convert gift cards to Naira with verified exchange rates & atomic settlement
+          Buy gift cards, sell yours, or withdraw approved gift-card proceeds.
         </p>
       </div>
 
+      <div className="grid grid-cols-3 gap-2 rounded-xl bg-muted p-1">
+        {(["sell", "buy", "withdraw"] as const).map((item) => (
+          <button
+            key={item}
+            type="button"
+            onClick={() => setMode(item)}
+            className={cn(
+              "rounded-lg px-3 py-2.5 text-sm font-semibold capitalize transition-colors",
+              mode === item
+                ? "bg-background text-primary shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {item === "withdraw" ? "Withdraw" : item === "buy" ? "Buy cards" : "Sell cards"}
+          </button>
+        ))}
+      </div>
+
+      {mode === "sell" ? (
+      <>
       <Card>
         <CardHeader>
           <CardTitle>Select Gift Card Type</CardTitle>
@@ -411,6 +433,10 @@ export default function GiftCardsPage() {
           </Button>
         </div>
       </Modal>
+      </>
+      ) : (
+        <GiftCardCommercePanel mode={mode} />
+      )}
     </motion.div>
   );
 }

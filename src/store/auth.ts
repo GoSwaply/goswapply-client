@@ -13,6 +13,7 @@ interface AuthState {
   logout: () => Promise<void>;
   fetchProfile: () => Promise<void>;
   updateProfile: (data: ProfileUpdateRequest) => Promise<void>;
+  uploadProfilePhoto: (photo: File) => Promise<void>;
   clearError: () => void;
 }
 
@@ -47,6 +48,9 @@ export const useAuthStore = create<AuthState>((set) => ({
             first_name: rawUser.first_name || rawUser.firstName || "User",
             last_name: rawUser.last_name || rawUser.lastName || "",
             phone_number: rawUser.phone_number || rawUser.phoneNumber || "",
+            referral_code: rawUser.referral_code || rawUser.referralCode,
+            profile_picture:
+              rawUser.profile_picture || rawUser.profilePictureUrl || undefined,
           }
         : null;
 
@@ -86,6 +90,9 @@ export const useAuthStore = create<AuthState>((set) => ({
             first_name: rawUser.first_name || rawUser.firstName || "User",
             last_name: rawUser.last_name || rawUser.lastName || "",
             phone_number: rawUser.phone_number || rawUser.phoneNumber || "",
+            referral_code: rawUser.referral_code || rawUser.referralCode,
+            profile_picture:
+              rawUser.profile_picture || rawUser.profilePictureUrl || undefined,
           }
         : null;
 
@@ -133,6 +140,9 @@ export const useAuthStore = create<AuthState>((set) => ({
             first_name: rawUser.first_name || rawUser.firstName || "User",
             last_name: rawUser.last_name || rawUser.lastName || "",
             phone_number: rawUser.phone_number || rawUser.phoneNumber || "",
+            referral_code: rawUser.referral_code || rawUser.referralCode,
+            profile_picture:
+              rawUser.profile_picture || rawUser.profilePictureUrl || undefined,
           }
         : null;
       set({ user, isAuthenticated: true, isLoading: false });
@@ -161,11 +171,43 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await authAPI.updateProfile(data);
-      set({ user: response.data, isLoading: false });
+      const rawUser = response.data;
+      set({
+        user: rawUser
+          ? {
+              ...rawUser,
+              first_name: rawUser.first_name || rawUser.firstName || "User",
+              last_name: rawUser.last_name || rawUser.lastName || "",
+              phone_number: rawUser.phone_number || rawUser.phoneNumber || "",
+              referral_code: rawUser.referral_code || rawUser.referralCode,
+              profile_picture:
+                rawUser.profile_picture || rawUser.profilePictureUrl || undefined,
+            }
+          : null,
+        isLoading: false,
+      });
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       set({
         error: err.response?.data?.message || "Update failed",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  uploadProfilePhoto: async (photo) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await authAPI.uploadProfilePhoto(photo);
+      set((state) => ({
+        user: state.user ? { ...state.user, ...response.data } : response.data,
+        isLoading: false,
+      }));
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      set({
+        error: err.response?.data?.message || "Photo upload failed",
         isLoading: false,
       });
       throw error;

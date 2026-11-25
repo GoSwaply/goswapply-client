@@ -9,8 +9,9 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { vtuAPI } from "@/lib/api";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { DataPlan, NetworkProvider, VasFieldConfig } from "@/types";
+import { SlideUpSelect, type SlideUpSelectOption } from "@/components/bills/SlideUpSelect";
 
 const defaultNetworks: { code: NetworkProvider; name: string; color: string; logo: string }[] = [
   { code: "mtn", name: "MTN Nigeria", color: "bg-yellow-500", logo: "M" },
@@ -86,10 +87,10 @@ export default function DataPage() {
         amount?: number | string;
         price?: number | string;
         provider_price?: number | string;
-        provider?: string;
         is_active?: boolean;
         priority?: number;
         created_at?: string;
+        provider?: "interswitch" | "flutterwave";
       };
       const mapped: DataPlan[] = (Array.isArray(raw) ? raw : []).map((b: RawDataPlan) => ({
         id: b.item_code ?? b.id ?? "",
@@ -100,10 +101,10 @@ export default function DataPage() {
         validity: b.validity ?? "",
         price: Number(b.amount ?? b.price ?? 0),
         provider_price: Number(b.amount ?? b.provider_price ?? 0),
-        provider: b.provider ?? "flutterwave",
         is_active: b.is_active ?? true,
         priority: b.priority ?? 0,
         created_at: b.created_at ?? "",
+        provider: b.provider ?? "flutterwave",
       }));
       setPlans(mapped);
     } catch {
@@ -141,6 +142,7 @@ export default function DataPage() {
         phone_number: phoneNumber,
         network: selectedNetwork as NetworkProvider,
         plan_id: selectedPlan!.id,
+        provider: selectedPlan!.provider,
         amount: selectedPlan!.price,
         pin,
       });
@@ -163,6 +165,21 @@ export default function DataPage() {
     setPlans([]);
     setShowSuccessModal(false);
   };
+  const networkOptions: SlideUpSelectOption[] = networks.map((network) => ({
+    value: network.code,
+    label: network.name,
+    leading: (
+      <span className={`flex h-10 w-10 items-center justify-center rounded-full font-bold text-white ${network.color}`}>
+        {network.logo}
+      </span>
+    ),
+  }));
+  const planOptions: SlideUpSelectOption[] = plans.map((plan) => ({
+    value: plan.id,
+    label: plan.data_amount,
+    description: `${plan.validity} · ${plan.provider ?? "Flutterwave"}`,
+    trailing: <span className="font-bold text-primary">{formatCurrency(plan.price)}</span>,
+  }));
 
   return (
     <motion.div
@@ -184,28 +201,17 @@ export default function DataPage() {
           <CardTitle>{fieldConfig.providerLabel || "Select Network"}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {networks.map((network) => (
-              <button
-                key={network.code}
-                onClick={() => setSelectedNetwork(network.code)}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  selectedNetwork === network.code
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <div
-                  className={`w-12 h-12 mx-auto rounded-full ${network.color} flex items-center justify-center text-white font-bold text-xl mb-2`}
-                >
-                  {network.logo}
-                </div>
-                <p className="text-sm font-medium text-foreground text-center">
-                  {network.name}
-                </p>
-              </button>
-            ))}
-          </div>
+          <SlideUpSelect
+            title="Choose a network"
+            description="Select the network for this purchase"
+            placeholder="Choose a mobile network"
+            options={networkOptions}
+            value={selectedNetwork}
+            onChange={(value) => {
+              setSelectedNetwork(value as NetworkProvider);
+              setSelectedPlan(null);
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -220,26 +226,14 @@ export default function DataPage() {
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : plans.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2">
-                {plans.map((plan) => (
-                  <button
-                    key={plan.id}
-                    onClick={() => setSelectedPlan(plan)}
-                    className={cn(
-                      "p-4 rounded-xl border-2 text-left transition-all",
-                      selectedPlan?.id === plan.id
-                        ? "border-primary bg-primary/10"
-                        : "border-border hover:border-primary/50"
-                    )}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-bold text-foreground">{plan.data_amount}</span>
-                      <span className="text-primary font-bold">{formatCurrency(plan.price)}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{plan.validity}</p>
-                  </button>
-                ))}
-              </div>
+              <SlideUpSelect
+                title="Choose a data plan"
+                description={`${plans.length} available plans for ${selectedNetwork}`}
+                placeholder="Choose a data plan"
+                options={planOptions}
+                value={selectedPlan?.id ?? ""}
+                onChange={(value) => setSelectedPlan(plans.find((plan) => plan.id === value) ?? null)}
+              />
             ) : (
               <div className="text-center py-12">
                 <Wifi className="w-12 h-12 mx-auto text-muted-foreground mb-4" />

@@ -22,6 +22,8 @@ export interface User {
   kyc_level: number;
   kyc_verified_at?: string;
   referral_code?: string;
+  referralCode?: string;
+  profilePictureUrl?: string | null;
   referred_by?: string;
   has_pin: boolean;
   last_login_ip?: string;
@@ -82,7 +84,10 @@ export type TransactionType =
   | "VAS_PAYMENT"
   | "FLIGHT_BOOKING"
   | "CRYPTO_PAYOUT"
-  | "GIFTCARD_PAYOUT";
+  | "GIFTCARD_PAYOUT"
+  | "GIFTCARD_PURCHASE"
+  | "GIFTCARD_WITHDRAWAL"
+  | "REFERRAL_BONUS";
 
 export type TransactionStatus = "PENDING" | "SUCCESS" | "FAILED";
 
@@ -105,6 +110,7 @@ export const CREDIT_TRANSACTION_TYPES: TransactionType[] = [
   "FUNDING",
   "CRYPTO_PAYOUT",
   "GIFTCARD_PAYOUT",
+  "REFERRAL_BONUS",
 ];
 
 
@@ -292,7 +298,7 @@ export interface DataPlan {
   validity: string;
   price: number;
   provider_price: number;
-  provider: string;
+  provider?: "interswitch" | "flutterwave";
   is_active: boolean;
   priority: number;
   profit_margin?: number;
@@ -958,6 +964,7 @@ export interface BuyDataRequest {
   phone_number: string;
   network: NetworkProvider;
   plan_id: string;
+  provider?: "interswitch" | "flutterwave";
   pin: string;
 }
 

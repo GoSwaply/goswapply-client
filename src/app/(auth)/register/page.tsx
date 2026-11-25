@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { EmailIcon, LockIcon, UserIcon, PhoneIcon, ArrowRightIcon, ArrowLeftIcon, GiftIcon } from "@/components/ui/Icons";
@@ -29,6 +29,15 @@ function RegisterForm() {
     confirm_password: "",
     referral_code: "",
   });
+  useEffect(() => {
+    const referralCode = searchParams.get("ref")?.trim();
+    if (referralCode) {
+      setFormData((current) => ({
+        ...current,
+        referral_code: current.referral_code || referralCode,
+      }));
+    }
+  }, [searchParams]);
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -53,5 +53,10 @@ export function maskAccountNumber(account: string): string {
  * value the API never returns, so every row rendered as a debit.
  */
 export function isCredit(tx: { type: string }): boolean {
-  return ["FUNDING", "CRYPTO_PAYOUT", "GIFTCARD_PAYOUT"].includes(tx.type);
+  return [
+    "FUNDING",
+    "CRYPTO_PAYOUT",
+    "GIFTCARD_PAYOUT",
+    "REFERRAL_BONUS",
+  ].includes(tx.type);
 }

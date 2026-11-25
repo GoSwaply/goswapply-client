@@ -11,6 +11,7 @@ import Modal from "@/components/ui/Modal";
 import { vtuAPI } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 import { NetworkProvider, VasFieldConfig } from "@/types";
+import { SlideUpSelect } from "@/components/bills/SlideUpSelect";
 
 const defaultNetworks: { code: NetworkProvider; name: string; color: string; logo: string }[] = [
   { code: "mtn", name: "MTN Nigeria", color: "bg-yellow-500", logo: "M" },
@@ -138,28 +139,22 @@ export default function AirtimePage() {
           <CardTitle>{fieldConfig.providerLabel || "Select Network"}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {networks.map((network) => (
-              <button
-                key={network.code}
-                onClick={() => setSelectedNetwork(network.code)}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  selectedNetwork === network.code
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <div
-                  className={`w-12 h-12 mx-auto rounded-full ${network.color} flex items-center justify-center text-white font-bold text-xl mb-2`}
-                >
+          <SlideUpSelect
+            title="Choose a network"
+            description="Select the network for this airtime top-up"
+            placeholder="Choose a mobile network"
+            value={selectedNetwork}
+            options={networks.map((network) => ({
+              value: network.code,
+              label: network.name,
+              leading: (
+                <span className={`flex h-10 w-10 items-center justify-center rounded-full font-bold text-white ${network.color}`}>
                   {network.logo}
-                </div>
-                <p className="text-sm font-medium text-foreground text-center">
-                  {network.name}
-                </p>
-              </button>
-            ))}
-          </div>
+                </span>
+              ),
+            }))}
+            onChange={(value) => setSelectedNetwork(value as NetworkProvider)}
+          />
         </CardContent>
       </Card>
 

@@ -195,6 +195,7 @@ export const authAPI = {
       email: data.email,
       phoneNumber: data.phoneNumber || data.phone_number,
       password: data.password,
+      referralCode: data.referral_code,
     }),
   verifyOtp: (data: OTPVerifyRequest) => api.post("/auth/verify-otp", data),
   resendOtp: (data: OTPRequest) => api.post("/auth/resend-otp", data),
@@ -203,6 +204,18 @@ export const authAPI = {
   logout: () => api.post("/auth/logout"),
   getProfile: () => api.get("/users/me"),
   updateProfile: (data: ProfileUpdateRequest) => api.patch("/users/me", data),
+  uploadProfilePhoto: (photo: File) => {
+    const body = new FormData();
+    body.append("photo", photo);
+    return api.post("/users/me/photo", body, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  getProfilePhoto: () =>
+    api.get("/users/me/photo", {
+      responseType: "blob",
+      params: { _: Date.now() },
+    }),
   setPin: (data: SetPinRequest) => api.post("/auth/set-pin", data),
   verifyPin: (data: VerifyPinRequest) => api.post("/auth/verify-pin", data),
   changePassword: (data: { oldPassword: string; newPassword: string }) =>
@@ -375,11 +388,12 @@ export const vtuAPI = {
   getAirtimeHistory: (params?: TransactionFilter) => api.get("/wallet/transactions", { params }),
   getDataPlans: (network?: NetworkProvider) =>
     api.get(`/services/data-bundles/${network || "mtn"}`),
-  buyData: (data: LegacyServicePayload & Pick<BuyDataRequest, "phone_number" | "network" | "plan_id">) =>
+  buyData: (data: LegacyServicePayload & Pick<BuyDataRequest, "phone_number" | "network" | "plan_id" | "provider">) =>
     api.post("/services/data", {
       phoneNumber: data.phoneNumber || data.phone_number,
       planCode: data.planCode || data.plan_id || "1GB",
       network: data.network,
+      provider: data.provider,
       amount: Number(data.amount || 500),
       transactionPin: data.pin,
     }),
@@ -455,6 +469,21 @@ export const giftcardsAPI = {
     api.post("/exchange/giftcards/sell", data, { headers: { "Content-Type": "multipart/form-data" } }),
   getHistory: (params?: TransactionFilter) => api.get("/exchange/giftcards/history", { params }),
   getTransaction: (reference: string) => api.get(`/exchange/giftcards/transactions/${reference}`),
+  getBuyOffers: () => api.get("/exchange/giftcards/buy/offers"),
+  buy: (data: { rateId: string; amount: number }) =>
+    api.post("/exchange/giftcards/buy", data),
+  getPurchases: () => api.get("/exchange/giftcards/purchases"),
+  requestWithdrawal: (data: {
+    amount: number;
+    accountName: string;
+    accountNumber: string;
+    bankName: string;
+  }) => api.post("/exchange/giftcards/withdrawals", data),
+  getWithdrawals: () => api.get("/exchange/giftcards/withdrawals"),
+};
+
+export const referralAPI = {
+  getSummary: () => api.get("/users/me/referrals"),
 };
 
 export interface AppNotification {
